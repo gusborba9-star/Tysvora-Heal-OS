@@ -39,7 +39,7 @@ Cada fase depende de validação da anterior; sua presença não significa imple
 **Objetivo:** implementar capacidades transversais.  
 **Entregáveis:** Core, organizações, unidades, usuários, configuração, eventos, auditoria, workflows e notificações autorizados.  
 **Dependências:** FASE 2 aprovada.  
-**Conclusão:** Core validado e aprovado pelo CTO.
+**ESTADO:** a Fase 3 permanece em execução até que as demais capacidades previstas sejam implementadas e aprovadas formalmente pelo CTO. A aprovação da Execução 04B não encerra a Fase 3.
 
 ### Execução 03
 **STATUS:** NÃO APROVADA — EM CORREÇÃO  
@@ -50,23 +50,25 @@ Cada fase depende de validação da anterior; sua presença não significa imple
 **STATUS:** EM AUDITORIA  
 **OBJETIVO:** corrigir invariantes de tenancy e relacionamento entre entidades sem ampliar o escopo da FASE 3.
 
-
 ### Execução 04
-**STATUS:** AGUARDANDO VALIDAÇÃO DO CTO
-**COMMIT:** PENDENTE DE VALIDAÇÃO
-**OBJETIVO:** estabelecer a camada de Application Services / Use Cases e suas fronteiras com Domain, Contracts e Infrastructure.
-**IMPLEMENTAÇÃO:** concluída, com correção de autorização registrada na Execução 04B.
-**VALIDAÇÕES EXECUTADAS:** build TypeScript; suíte completa de testes; testes específicos de autorização de papéis; invariantes de tenancy; verificação de dependências e ausência de infraestrutura externa.
+**STATUS:** CORRIGIDA PELA EXECUÇÃO 04B; NÃO TRATAR COMO APROVAÇÃO INDEPENDENTE  
+**COMMIT ORIGINAL:** `f71d668c845a1a5cbfb5c396ff752d0eeca6cc57`  
+**REGISTRO:** a implementação original foi objeto de correção de autorização na Execução 04B. A aprovação formal registrada para este conjunto refere-se à Execução 04B e ao commit indicado abaixo.  
 **INFRAESTRUTURA EXTERNA:** não conectada.
-**PRÓXIMO PASSO:** auditoria e aprovação/rejeição pelo CTO.
 
 ### Execução 04B — Correção de autorização
-**STATUS:** IMPLEMENTADA / AGUARDANDO VALIDAÇÃO DO CTO
-**COMMIT:** PENDENTE DE VALIDAÇÃO
-**PARENT:** `f71d668c845a1a5cbfb5c396ff752d0eeca6cc57`
-**OBJETIVO:** impedir que contextos de tenant atribuam papéis de escopo platform e exigir autorização explícita `role.assign.platform`, além da autorização genérica.
-**VALIDAÇÃO:** build TypeScript, testes automatizados completos, testes de autorização específica e invariantes de tenancy.
+**STATUS:** APROVADA FORMALMENTE PELO CTO  
+**COMMIT APROVADO:** `9153602f6fd3d4defe3a639b34bd5e2c7f9c27d7`  
+**PARENT:** `f71d668c845a1a5cbfb5c396ff752d0eeca6cc57`  
+**OBJETIVO:** impedir que contextos de tenant atribuam papéis de escopo platform e exigir autorização explícita `role.assign.platform`, além da autorização genérica.  
+**VALIDAÇÃO CI:** CONCLUÍDA COM SUCESSO  
+**SHA EXECUTADO NO CI:** `c1953c8372ebbe517f5aa52b789595cbe956e29c`  
+**GITHUB ACTIONS RUN #2:** https://github.com/gusborba9-star/Tysvora-Heal-OS/actions/runs/37858811970  
+**EVIDÊNCIA:** o job `build-and-test` terminou com `completed / success`; `npm test` executou o build TypeScript e os testes de aplicação, autorização de papéis e Core.  
 **INFRAESTRUTURA EXTERNA:** nenhuma conectada.
+
+### Próxima execução
+**EXECUÇÃO 05:** NÃO INICIADA E NÃO AUTORIZADA. Qualquer execução futura depende de autorização explícita posterior do CTO.
 
 ## FASE 4 — MODULE REGISTRY
 **STATUS: NÃO INICIADA**
@@ -163,4 +165,4 @@ Cada fase depende de validação da anterior; sua presença não significa imple
 
 O roadmap é macro e não autoriza sozinho uma implementação. Cada avanço exige execução explícita do CTO, respeitando Blueprint, fase e dependências.
 
-A FASE 3 permanece **EM EXECUÇÃO** até auditoria e aprovação formal do CTO. Nenhuma fase posterior é autorizada por este documento.
+A FASE 3 permanece **EM EXECUÇÃO** até que as capacidades previstas sejam implementadas e aprovadas formalmente. Nenhuma fase posterior é autorizada por este documento.
