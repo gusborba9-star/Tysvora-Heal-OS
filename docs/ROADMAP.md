@@ -22,16 +22,19 @@ Cada fase depende de validação da anterior; sua presença não significa imple
 **Conclusão:** documentação revisada e consistente, sem produto.
 
 ## FASE 2 — ARQUITETURA TÉCNICA
-**STATUS: EM EXECUÇÃO**  
-**EXECUÇÃO:** 02
+**STATUS: CONCLUÍDA**  
+**EXECUÇÃO:** 02  
+**COMMIT:** `7751ae9cbafd2dc6b42a329f061aeab07c25be6d`  
+**VALIDAÇÃO:** APROVADA PELO CTO
 
 **Objetivo:** transformar a arquitetura conceitual em decisões técnicas verificáveis.  
 **Entregáveis:** arquitetura técnica, stack, persistência, tenancy, contratos, segurança, eventos, módulos, IA, integrações, observabilidade e deployment.  
 **Dependências:** FASE 1.  
-**Conclusão:** documentação técnica produzida e submetida à auditoria/aprovação do CTO. A fase não está concluída nesta execução.
+**Conclusão:** arquitetura técnica documentada, auditada e aprovada pelo CTO.
 
 ## FASE 3 — HEAL CORE
-**STATUS: NÃO INICIADA**
+**STATUS: EM EXECUÇÃO**  
+**EXECUÇÃO:** 03
 
 **Objetivo:** implementar capacidades transversais.  
 **Entregáveis:** Core, organizações, unidades, usuários, configuração, eventos, auditoria, workflows e notificações autorizados.  
@@ -133,4 +136,4 @@ Cada fase depende de validação da anterior; sua presença não significa imple
 
 O roadmap é macro e não autoriza sozinho uma implementação. Cada avanço exige execução explícita do CTO, respeitando Blueprint, fase e dependências.
 
-A FASE 2 permanece **EM EXECUÇÃO** até auditoria e aprovação formal do CTO. Nenhuma implementação da FASE 3 é autorizada por este documento.
+A FASE 3 permanece **EM EXECUÇÃO** até auditoria e aprovação formal do CTO. Nenhuma fase posterior é autorizada por este documento.

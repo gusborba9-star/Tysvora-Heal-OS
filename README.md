@@ -50,6 +50,6 @@ O Tysvora Heal OS não incorpora código do Veritas-OS nesta fase. Componentes c
 
 ## Status
 
-**Em construção — Fase 1: Fundação**
+**Em construção — Fase 3: Heal Core**
 
 Nesta fase, o repositório contém exclusivamente a fundamentação documental e de governança inicial. Não há funcionalidades de produto implementadas.
