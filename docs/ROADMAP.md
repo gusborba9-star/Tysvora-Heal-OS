@@ -34,12 +34,21 @@ Cada fase depende de validação da anterior; sua presença não significa imple
 
 ## FASE 3 — HEAL CORE
 **STATUS: EM EXECUÇÃO**  
-**EXECUÇÃO:** 03
+**EXECUÇÕES:** 03, 03A
 
 **Objetivo:** implementar capacidades transversais.  
 **Entregáveis:** Core, organizações, unidades, usuários, configuração, eventos, auditoria, workflows e notificações autorizados.  
 **Dependências:** FASE 2 aprovada.  
-**Conclusão:** Core validado.
+**Conclusão:** Core validado e aprovado pelo CTO.
+
+### Execução 03
+**STATUS:** NÃO APROVADA — EM CORREÇÃO  
+**COMMIT:** `081efd677d7451b3bea2fcf761ffede701fc0cea`  
+**RESULTADO:** estrutura inicial implementada; invariantes de tenancy identificadas pelo CTO como insuficientemente protegidas.
+
+### Execução 03A
+**STATUS:** EM AUDITORIA  
+**OBJETIVO:** corrigir invariantes de tenancy e relacionamento entre entidades sem ampliar o escopo da FASE 3.
 
 ## FASE 4 — MODULE REGISTRY
 **STATUS: NÃO INICIADA**
