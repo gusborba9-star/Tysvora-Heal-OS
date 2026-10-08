@@ -6,3 +6,8 @@ export * from "./core/domain/event.js";
 export * from "./core/domain/errors.js";
 export * from "./core/contracts/core.js";
 export * from "./core/infrastructure/in-memory-event-publisher.js";
+export * from "./core/contracts/application.js";
+export * from "./core/infrastructure/in-memory-repositories.js";
+export * from "./core/infrastructure/in-memory-audit-sink.js";
+export * from "./core/infrastructure/deterministic.js";
+export * from "./core/application/core.js";

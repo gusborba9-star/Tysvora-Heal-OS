@@ -34,7 +34,7 @@ Cada fase depende de validação da anterior; sua presença não significa imple
 
 ## FASE 3 — HEAL CORE
 **STATUS: EM EXECUÇÃO**  
-**EXECUÇÕES:** 03, 03A
+**EXECUÇÕES:** 03, 03A, 04
 
 **Objetivo:** implementar capacidades transversais.  
 **Entregáveis:** Core, organizações, unidades, usuários, configuração, eventos, auditoria, workflows e notificações autorizados.  
@@ -49,6 +49,16 @@ Cada fase depende de validação da anterior; sua presença não significa imple
 ### Execução 03A
 **STATUS:** EM AUDITORIA  
 **OBJETIVO:** corrigir invariantes de tenancy e relacionamento entre entidades sem ampliar o escopo da FASE 3.
+
+
+### Execução 04
+**STATUS:** AGUARDANDO VALIDAÇÃO DO CTO
+**COMMIT:** PENDENTE DE VALIDAÇÃO
+**OBJETIVO:** estabelecer a camada de Application Services / Use Cases e suas fronteiras com Domain, Contracts e Infrastructure.
+**IMPLEMENTAÇÃO:** concluída.
+**VALIDAÇÕES EXECUTADAS:** build TypeScript; testes da Application Layer; testes do Core; verificação de imports e dependências; verificação de ausência de infraestrutura externa; verificação de tenancy, autorização, auditoria e eventos.
+**INFRAESTRUTURA EXTERNA:** não conectada.
+**PRÓXIMO PASSO:** auditoria e aprovação/rejeição pelo CTO.
 
 ## FASE 4 — MODULE REGISTRY
 **STATUS: NÃO INICIADA**
