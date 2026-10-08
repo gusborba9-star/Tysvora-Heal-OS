@@ -185,8 +185,22 @@ export class HealCoreApplication {
   }
 
   async assignRole(context: ApplicationContext, command: AssignRoleCommand): Promise<UserRole> {
-    const tenantId = this.tenantId(context);
-    if (command.scope.level !== "platform" && command.scope.tenantId !== tenantId) throw new DomainInvariantError("role assignment tenant does not match request tenancy");
+    // Platform-wide assignments are a separate privilege boundary. Reject tenant
+    // contexts before generic authorization, reads, persistence, audit or events.
+    if (command.scope.level === "platform") {
+      if (context.scope !== "platform") {
+        throw new AuthorizationError("platform role assignment requires platform context");
+      }
+      await this.authorize(context, "role.assign.platform", "user-role");
+    } else {
+      const tenantId = this.tenantId(context);
+      if (command.scope.tenantId !== tenantId) {
+        throw new DomainInvariantError("role assignment tenant does not match request tenancy");
+      }
+    }
+
+    // The specific platform permission does not replace the general assignment
+    // permission; both gates must pass for a platform-wide assignment.
     await this.authorize(context, "role.assign", "user-role");
     const user = await this.d.users.getById(command.userId);
     const role = await this.d.roles.getById(command.roleId);
@@ -200,9 +214,10 @@ export class HealCoreApplication {
     if (command.scope.level === "unit" && !unit) throw new NotFoundError("unit", command.scope.unitId);
 
     const entity = createUserRole(command, user, organization ?? undefined, unit ?? undefined);
+    const auditTenantId = command.scope.level === "platform" ? user.tenantId : this.tenantId(context);
     await this.d.userRoles.save(entity);
-    await this.audit(context, tenantId, "role.assigned", "user-role", entity.userId);
-    await this.event(context, tenantId, "role.assigned", { userId: entity.userId, roleId: entity.roleId });
+    await this.audit(context, auditTenantId, "role.assigned", "user-role", entity.userId);
+    await this.event(context, auditTenantId, "role.assigned", { userId: entity.userId, roleId: entity.roleId, scope: command.scope.level });
     return entity;
   }
 }

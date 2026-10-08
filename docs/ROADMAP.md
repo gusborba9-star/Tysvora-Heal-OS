@@ -34,7 +34,7 @@ Cada fase depende de validação da anterior; sua presença não significa imple
 
 ## FASE 3 — HEAL CORE
 **STATUS: EM EXECUÇÃO**  
-**EXECUÇÕES:** 03, 03A, 04
+**EXECUÇÕES:** 03, 03A, 04, 04B
 
 **Objetivo:** implementar capacidades transversais.  
 **Entregáveis:** Core, organizações, unidades, usuários, configuração, eventos, auditoria, workflows e notificações autorizados.  
@@ -55,10 +55,18 @@ Cada fase depende de validação da anterior; sua presença não significa imple
 **STATUS:** AGUARDANDO VALIDAÇÃO DO CTO
 **COMMIT:** PENDENTE DE VALIDAÇÃO
 **OBJETIVO:** estabelecer a camada de Application Services / Use Cases e suas fronteiras com Domain, Contracts e Infrastructure.
-**IMPLEMENTAÇÃO:** concluída.
-**VALIDAÇÕES EXECUTADAS:** build TypeScript; testes da Application Layer; testes do Core; verificação de imports e dependências; verificação de ausência de infraestrutura externa; verificação de tenancy, autorização, auditoria e eventos.
+**IMPLEMENTAÇÃO:** concluída, com correção de autorização registrada na Execução 04B.
+**VALIDAÇÕES EXECUTADAS:** build TypeScript; suíte completa de testes; testes específicos de autorização de papéis; invariantes de tenancy; verificação de dependências e ausência de infraestrutura externa.
 **INFRAESTRUTURA EXTERNA:** não conectada.
 **PRÓXIMO PASSO:** auditoria e aprovação/rejeição pelo CTO.
+
+### Execução 04B — Correção de autorização
+**STATUS:** IMPLEMENTADA / AGUARDANDO VALIDAÇÃO DO CTO
+**COMMIT:** PENDENTE DE VALIDAÇÃO
+**PARENT:** `f71d668c845a1a5cbfb5c396ff752d0eeca6cc57`
+**OBJETIVO:** impedir que contextos de tenant atribuam papéis de escopo platform e exigir autorização explícita `role.assign.platform`, além da autorização genérica.
+**VALIDAÇÃO:** build TypeScript, testes automatizados completos, testes de autorização específica e invariantes de tenancy.
+**INFRAESTRUTURA EXTERNA:** nenhuma conectada.
 
 ## FASE 4 — MODULE REGISTRY
 **STATUS: NÃO INICIADA**
