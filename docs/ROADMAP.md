@@ -11,101 +11,126 @@ Cada fase depende de validação da anterior; sua presença não significa imple
 **Conclusão:** governança aprovada e adotada.
 
 ## FASE 1 — FUNDAÇÃO
+**STATUS: CONCLUÍDA**  
+**EXECUÇÃO:** 01  
+**COMMIT:** `b252464cd31f3d40d45f1328af8615b714b0c883`  
+**VALIDAÇÃO:** APROVADA PELO CTO
+
 **Objetivo:** estabelecer a base documental controlada.  
 **Entregáveis:** README, Blueprint, Roadmap, visão, princípios e fases.  
 **Dependências:** FASE 0.  
 **Conclusão:** documentação revisada e consistente, sem produto.
 
 ## FASE 2 — ARQUITETURA TÉCNICA
+**STATUS: EM EXECUÇÃO**  
+**EXECUÇÃO:** 02
+
 **Objetivo:** transformar a arquitetura conceitual em decisões técnicas verificáveis.  
-**Entregáveis:** stack, persistência, tenancy, contratos, infraestrutura e deployment.  
+**Entregáveis:** arquitetura técnica, stack, persistência, tenancy, contratos, segurança, eventos, módulos, IA, integrações, observabilidade e deployment.  
 **Dependências:** FASE 1.  
-**Conclusão:** arquitetura técnica aprovada pelo CTO.
+**Conclusão:** documentação técnica produzida e submetida à auditoria/aprovação do CTO. A fase não está concluída nesta execução.
 
 ## FASE 3 — HEAL CORE
+**STATUS: NÃO INICIADA**
+
 **Objetivo:** implementar capacidades transversais.  
 **Entregáveis:** Core, organizações, unidades, usuários, configuração, eventos, auditoria, workflows e notificações autorizados.  
-**Dependências:** FASE 2.  
+**Dependências:** FASE 2 aprovada.  
 **Conclusão:** Core validado.
 
 ## FASE 4 — MODULE REGISTRY
+**STATUS: NÃO INICIADA**
+
 **Objetivo:** governar registro, disponibilidade, dependências e estado dos módulos.  
-**Entregáveis:** registry, metadados, dependências, ciclo de vida e ativação/desativação.  
 **Dependências:** FASE 3.  
 **Conclusão:** módulos governados de forma controlada e auditável.
 
 ## FASE 5 — IDENTITY / SECURITY / LGPD
+**STATUS: NÃO INICIADA**
+
 **Objetivo:** consolidar identidade, autorização, segurança e privacidade.  
-**Entregáveis:** identidade, RBAC, least privilege, segregação, auditoria, privacidade e proteção de secrets/dados.  
 **Dependências:** FASES 2–4.  
 **Conclusão:** controles validados nos cenários autorizados.
 
 ## FASE 6 — ENGINES REUTILIZÁVEIS
+**STATUS: NÃO INICIADA**
+
 **Objetivo:** criar capacidades reutilizáveis entre módulos.  
-**Entregáveis:** engines, contratos reutilizáveis e mecanismos determinísticos.  
 **Dependências:** FASES 2–5.  
 **Conclusão:** capacidades reutilizáveis validadas.
 
 ## FASE 7 — CLINICAL INTELLIGENCE
+**STATUS: NÃO INICIADA**
+
 **Objetivo:** implementar apoio à decisão profissional sob governança.  
-**Entregáveis:** Evidence, Calculation, Protocol, Safety e AI Engines; avaliação do Veritas-OS por REUTILIZAR/ADAPTAR/DESCARTAR/RECONSTRUIR.  
 **Dependências:** FASES 3, 5 e 6.  
 **Conclusão:** camada validada como apoio, sem autoridade clínica autônoma.
 
 ## FASE 8 — SENTINELA
+**STATUS: NÃO INICIADA**
+
 **Objetivo:** observação, detecção e alertas.  
-**Entregáveis:** observação de eventos/indicadores, regras, alertas e rastreabilidade.  
 **Dependências:** FASES 3, 5, 6 e, quando aplicável, 7.  
 **Conclusão:** Sentinela validada e observável.
 
 ## FASE 9 — PRIMEIRO MÓDULO VERTICAL
+**STATUS: NÃO INICIADA**
+
 **Objetivo:** validar o primeiro módulo sobre o Core.  
-**Entregáveis:** módulo aprovado, integração, tenancy, permissões e ciclo de ativação.  
 **Dependências:** FASES 3–8 conforme o módulo.  
 **Conclusão:** módulo validado sem duplicação do Core.
 
 ## FASE 10 — INTEGRAÇÕES
+**STATUS: NÃO INICIADA**
+
 **Objetivo:** estabelecer integrações externas por Integration Gateway e adapters.  
-**Entregáveis:** gateway, adapters, contratos, observabilidade e auditoria.  
 **Dependências:** FASES 2–5 e primeiro módulo.  
 **Conclusão:** integrações homologadas.
 
 ## FASE 11 — AI GATEWAY
+**STATUS: NÃO INICIADA**
+
 **Objetivo:** camada governada e substituível para IA.  
-**Entregáveis:** gateway, abstração de provedores, governança de contexto, custos e utilização.  
 **Dependências:** FASES 2, 5, 6 e 7.  
 **Conclusão:** IA acessível sem acoplamento estrutural a um único provedor.
 
 ## FASE 12 — ANALYTICS / GESTÃO
+**STATUS: NÃO INICIADA**
+
 **Objetivo:** análise e gestão sobre dados e eventos autorizados.  
-**Entregáveis:** indicadores, analytics, gestão e visualizações conforme especificação posterior.  
 **Dependências:** Core, segurança, engines, integrações e módulos.  
 **Conclusão:** capacidades validadas.
 
 ## FASE 13 — DEPLOYMENT CENTER
+**STATUS: NÃO INICIADA**
+
 **Objetivo:** distribuição e implantação versionada e reproduzível.  
-**Entregáveis:** versões, artefatos, pacotes, homologação, deploy e rollback.  
 **Dependências:** FASES 2–5 e maturidade operacional.  
 **Conclusão:** versão autorizada preparada para implantação sem secrets nos artefatos.
 
 ## FASE 14 — HOMOLOGAÇÃO
+**STATUS: NÃO INICIADA**
+
 **Objetivo:** validar ambientes e cenários de aceitação.  
-**Entregáveis:** critérios, testes, evidências e validações de segurança, integração e operação.  
 **Dependências:** escopo de produto e infraestrutura necessário.  
 **Conclusão:** aprovação formal para produção.
 
 ## FASE 15 — PRODUÇÃO
+**STATUS: NÃO INICIADA**
+
 **Objetivo:** disponibilizar versão autorizada em produção.  
-**Entregáveis:** release, observabilidade, controles, rollback e monitoramento pós-release.  
 **Dependências:** FASE 14.  
 **Conclusão:** operação estável dentro dos critérios definidos.
 
 ## FASE 16 — EXPANSÃO
+**STATUS: NÃO INICIADA**
+
 **Objetivo:** ampliar módulos, integrações, organizações e capacidades preservando arquitetura e governança.  
-**Entregáveis:** novos módulos, integrações, engines, tenants e evoluções aprovadas.  
 **Dependências:** produção estável e autorização de evolução.  
 **Conclusão:** cada expansão possui escopo, validação, versionamento e governança próprios.
 
 ## Governança do roadmap
 
 O roadmap é macro e não autoriza sozinho uma implementação. Cada avanço exige execução explícita do CTO, respeitando Blueprint, fase e dependências.
+
+A FASE 2 permanece **EM EXECUÇÃO** até auditoria e aprovação formal do CTO. Nenhuma implementação da FASE 3 é autorizada por este documento.
