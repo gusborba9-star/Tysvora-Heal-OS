@@ -7,6 +7,9 @@ import { ConfigurationRepository, OrganizationRepository, UnitRepository, AuditS
 import { EventPublisher } from "../contracts/core.js";
 import { ApplicationContext, AuthorizationService, AuthorizationError, ApplicationError, NotFoundError } from "./core.js";
 
+/** Scope levels supported by this execution; platform is intentionally excluded. */
+type TenantConfigurationScope = Exclude<ConfigurationScope, { readonly level: "platform" }>;
+
 export interface CreateConfigurationCommand { readonly key:string; readonly value:ConfigurationJsonValue; readonly scope:ConfigurationScope; }
 export interface ReadConfigurationCommand { readonly id:EntityId; readonly scope:ConfigurationScope; }
 export interface ReadConfigurationByKeyCommand { readonly key:string; readonly scope:ConfigurationScope; }
@@ -17,11 +20,15 @@ export interface ConfigurationApplicationDependencies {
 }
 export class ConfigurationApplication {
   constructor(private readonly d:ConfigurationApplicationDependencies) {}
-  private rejectPlatform(scope:ConfigurationScope):void {
+
+  /** Reject platform before authorization or any repository/audit/event side effect. */
+  private supportedScope(scope:ConfigurationScope):TenantConfigurationScope {
     if(scope.level==="platform") throw new ApplicationError("platform configuration is not supported by this execution");
+    return scope;
   }
-  private validateContextScope(context:ApplicationContext,scope:ConfigurationScope):EntityId {
-    this.rejectPlatform(scope);
+
+  private validateContextScope(context:ApplicationContext,requestedScope:ConfigurationScope):EntityId {
+    const scope=this.supportedScope(requestedScope);
     if(context.scope!=="tenant") throw new ApplicationError("tenant context is required for configuration operations");
     const tenantId=requireNonEmpty(context.tenantId,"context.tenantId");
     if(scope.tenantId!==tenantId) throw new DomainInvariantError("configuration scope is outside request tenancy");
@@ -33,6 +40,7 @@ export class ConfigurationApplication {
     }
     return tenantId;
   }
+
   private resource(scope:ConfigurationScope):string {
     switch(scope.level) {
       case "platform": return "configuration:platform";
@@ -65,10 +73,11 @@ export class ConfigurationApplication {
   }
   async create(context:ApplicationContext,command:CreateConfigurationCommand):Promise<Configuration> {
     const tenantId=this.validateContextScope(context,command.scope);
-    await this.authorize(context,"configuration.create",command.scope,command.key);
-    await this.validateTarget(command.scope);
-    if(await this.d.configurations.getByKeyAndScope(command.key,command.scope)) throw new ApplicationError("configuration key already exists in this scope");
-    const entity=createConfiguration({id:this.d.ids.next(),key:command.key,value:command.value,scope:command.scope});
+    const scope=this.supportedScope(command.scope);
+    await this.authorize(context,"configuration.create",scope,command.key);
+    await this.validateTarget(scope);
+    if(await this.d.configurations.getByKeyAndScope(command.key,scope)) throw new ApplicationError("configuration key already exists in this scope");
+    const entity=createConfiguration({id:this.d.ids.next(),key:command.key,value:command.value,scope});
     if(await this.d.configurations.getById(entity.id)) throw new ApplicationError("configuration identity already exists");
     await this.d.configurations.save(entity);
     await this.record(context,tenantId,"created",entity);
@@ -76,27 +85,30 @@ export class ConfigurationApplication {
   }
   async getById(context:ApplicationContext,command:ReadConfigurationCommand):Promise<Configuration> {
     const tenantId=this.validateContextScope(context,command.scope);
-    await this.authorize(context,"configuration.read",command.scope,command.id);
-    await this.validateTarget(command.scope);
+    const scope=this.supportedScope(command.scope);
+    await this.authorize(context,"configuration.read",scope,command.id);
+    await this.validateTarget(scope);
     const entity=await this.d.configurations.getById(command.id);
-    if(!entity || !sameConfigurationScope(entity.scope,command.scope) || entity.scope.tenantId!==tenantId) throw new NotFoundError("configuration",command.id);
+    if(!entity || entity.scope.level==="platform" || !sameConfigurationScope(entity.scope,scope) || entity.scope.tenantId!==tenantId) throw new NotFoundError("configuration",command.id);
     return entity;
   }
   async getByKey(context:ApplicationContext,command:ReadConfigurationByKeyCommand):Promise<Configuration> {
     const tenantId=this.validateContextScope(context,command.scope);
+    const scope=this.supportedScope(command.scope);
     const key=requireNonEmpty(command.key,"configuration.key");
-    await this.authorize(context,"configuration.read",command.scope,key);
-    await this.validateTarget(command.scope);
-    const entity=await this.d.configurations.getByKeyAndScope(key,command.scope);
-    if(!entity || !sameConfigurationScope(entity.scope,command.scope) || entity.scope.tenantId!==tenantId) throw new NotFoundError("configuration",key);
+    await this.authorize(context,"configuration.read",scope,key);
+    await this.validateTarget(scope);
+    const entity=await this.d.configurations.getByKeyAndScope(key,scope);
+    if(!entity || entity.scope.level==="platform" || !sameConfigurationScope(entity.scope,scope) || entity.scope.tenantId!==tenantId) throw new NotFoundError("configuration",key);
     return entity;
   }
   async update(context:ApplicationContext,command:UpdateConfigurationCommand):Promise<Configuration> {
     const tenantId=this.validateContextScope(context,command.scope);
-    await this.authorize(context,"configuration.update",command.scope,command.id);
-    await this.validateTarget(command.scope);
+    const scope=this.supportedScope(command.scope);
+    await this.authorize(context,"configuration.update",scope,command.id);
+    await this.validateTarget(scope);
     const current=await this.d.configurations.getById(command.id);
-    if(!current || !sameConfigurationScope(current.scope,command.scope) || current.scope.tenantId!==tenantId) throw new NotFoundError("configuration",command.id);
+    if(!current || current.scope.level==="platform" || !sameConfigurationScope(current.scope,scope) || current.scope.tenantId!==tenantId) throw new NotFoundError("configuration",command.id);
     const updated=createConfiguration({id:current.id,key:current.key,value:command.value,scope:current.scope});
     await this.d.configurations.save(updated);
     await this.record(context,tenantId,"updated",updated);
