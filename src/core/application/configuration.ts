@@ -43,11 +43,11 @@ export class ConfigurationApplication {
 
   private resource(scope:ConfigurationScope):string {
     switch(scope.level) {
-      case "platform": return "configuration:platform";
-      case "tenant": return "configuration:tenant:"+scope.tenantId;
-      case "organization": return "configuration:organization:"+scope.tenantId+":"+scope.organizationId;
-      case "unit": return "configuration:unit:"+scope.tenantId+":"+scope.organizationId+":"+scope.unitId;
-      case "module": return "configuration:module:"+scope.tenantId+":"+scope.moduleId;
+      case "platform": return JSON.stringify(["configuration", "platform"]);
+      case "tenant": return JSON.stringify(["configuration", "tenant", scope.tenantId]);
+      case "organization": return JSON.stringify(["configuration", "organization", scope.tenantId, scope.organizationId]);
+      case "unit": return JSON.stringify(["configuration", "unit", scope.tenantId, scope.organizationId, scope.unitId]);
+      case "module": return JSON.stringify(["configuration", "module", scope.tenantId, scope.moduleId]);
     }
   }
   private async authorize(context:ApplicationContext,action:string,scope:ConfigurationScope,resourceId?:EntityId):Promise<void> {

@@ -24,11 +24,11 @@ export function createConfiguration(input:Configuration):Configuration {
 export function configurationScopeKey(scope:ConfigurationScope):string {
   validateConfigScope(scope);
   switch(scope.level) {
-    case "platform": return "platform";
-    case "tenant": return "tenant:" + scope.tenantId;
-    case "organization": return "organization:" + scope.tenantId + ":" + scope.organizationId;
-    case "unit": return "unit:" + scope.tenantId + ":" + scope.organizationId + ":" + scope.unitId;
-    case "module": return "module:" + scope.tenantId + ":" + scope.moduleId;
+    case "platform": return JSON.stringify(["platform"]);
+    case "tenant": return JSON.stringify(["tenant", scope.tenantId]);
+    case "organization": return JSON.stringify(["organization", scope.tenantId, scope.organizationId]);
+    case "unit": return JSON.stringify(["unit", scope.tenantId, scope.organizationId, scope.unitId]);
+    case "module": return JSON.stringify(["module", scope.tenantId, scope.moduleId]);
   }
 }
 export function sameConfigurationScope(a:ConfigurationScope,b:ConfigurationScope):boolean { return configurationScopeKey(a)===configurationScopeKey(b); }

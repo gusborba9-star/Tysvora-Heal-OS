@@ -1,7 +1,7 @@
 import {
   ConfigurationApplication, AuthorizationService, AuthorizationRequest, ApplicationError, AuthorizationError, DomainInvariantError, NotFoundError,
   InMemoryConfigurationRepository, InMemoryRepository, InMemoryAuditSink, InMemoryEventPublisher, SequenceIdGenerator, FixedClock,
-  createTenant, createOrganization, createUnit
+  createTenant, createOrganization, createUnit, configurationScopeKey, sameConfigurationScope, createConfiguration
 } from "../src/index.js";
 function assert(value:unknown,message:string):asserts value { if(!value) throw new Error("Assertion failed: "+message); }
 async function rejects(factory:()=>Promise<unknown>,ErrorType:Function,message:string):Promise<void> { try { await factory(); throw new Error("Expected rejection: "+message); } catch(error) { if(!(error instanceof ErrorType)) throw error; } }
@@ -66,3 +66,50 @@ assert(audit.snapshot().length===auditBefore && events.snapshot().length===event
 assert(audit.snapshot().length===5 && events.snapshot().length===5,"each successful create/update emits audit and event");
 assert(policy.requests.every(request=>request.resource.startsWith("configuration:")),"authorization receives explicit scope resource");
 console.log("PASS configuration application, scope isolation, authorization, platform rejection and side-effect invariants");
+
+const collisionScopeA={level:"organization" as const,tenantId:"tenant:a",organizationId:"b"};
+const collisionScopeB={level:"organization" as const,tenantId:"tenant",organizationId:"a:b"};
+assert(configurationScopeKey(collisionScopeA)!==configurationScopeKey(collisionScopeB),"delimiter-containing scope identifiers have distinct canonical keys");
+assert(!sameConfigurationScope(collisionScopeA,collisionScopeB),"delimiter-containing scopes compare as different");
+const collisionRepo=new InMemoryConfigurationRepository();
+await collisionRepo.save(createConfiguration({id:"collision-a",key:"same.key",value:{owner:"A"},scope:collisionScopeA}));
+await collisionRepo.save(createConfiguration({id:"collision-b",key:"same.key",value:{owner:"B"},scope:collisionScopeB}));
+assert((await collisionRepo.getByKeyAndScope("same.key",collisionScopeA))?.id==="collision-a","repository lookup finds first structurally distinct scope");
+assert((await collisionRepo.getByKeyAndScope("same.key",collisionScopeB))?.id==="collision-b","repository lookup does not collide across delimiter-containing scopes");
+const resourceOrgA=createOrganization({id:"org:x:y",tenantId:tenantA.id,name:"Colon Org A"},tenantA);
+const resourceOrgB=createOrganization({id:"org:x",tenantId:tenantA.id,name:"Colon Org B"},tenantA);
+const resourceUnitA=createUnit({id:"z",tenantId:tenantA.id,organizationId:resourceOrgA.id,name:"Colon Unit A"},resourceOrgA);
+const resourceUnitB=createUnit({id:"y:z",tenantId:tenantA.id,organizationId:resourceOrgB.id,name:"Colon Unit B"},resourceOrgB);
+await organizations.save(resourceOrgA); await organizations.save(resourceOrgB);
+await units.save(resourceUnitA); await units.save(resourceUnitB);
+await app.create(tenantCtx,{key:"authorization.resource.collision",value:"A",scope:{level:"unit",tenantId:tenantA.id,organizationId:resourceOrgA.id,unitId:resourceUnitA.id}});
+const resourceA=policy.requests[policy.requests.length-1].resource;
+await app.create(tenantCtx,{key:"authorization.resource.collision",value:"B",scope:{level:"unit",tenantId:tenantA.id,organizationId:resourceOrgB.id,unitId:resourceUnitB.id}});
+const resourceB=policy.requests[policy.requests.length-1].resource;
+assert(resourceA!==resourceB,"authorization resource encoding distinguishes delimiter-containing identifiers");
+const mutationRepo=new InMemoryConfigurationRepository();
+const inputValue={nested:{enabled:true,labels:["original","stable"]}};
+const mutableInput=createConfiguration({id:"mutation-config",key:"mutation.key",value:inputValue,scope:tenantScope});
+await mutationRepo.save(mutableInput);
+inputValue.nested.enabled=false;
+inputValue.nested.labels.push("changed-after-save");
+(mutableInput.value as {nested:{enabled:boolean;labels:string[]}}).nested.labels[0]="mutated-entity-after-save";
+let persisted=await mutationRepo.getById("mutation-config");
+assert((persisted?.value as {nested:{enabled:boolean;labels:string[]}}).nested.enabled===true,"mutating save input does not mutate persisted nested object");
+assert((persisted?.value as {nested:{enabled:boolean;labels:string[]}}).nested.labels.join(",")==="original,stable","mutating save input does not mutate persisted array");
+(persisted!.value as {nested:{enabled:boolean;labels:string[]}}).nested.enabled=false;
+(persisted!.value as {nested:{enabled:boolean;labels:string[]}}).nested.labels.push("changed-after-getById");
+const byKeyAfterIdMutation=await mutationRepo.getByKeyAndScope("mutation.key",tenantScope);
+assert((byKeyAfterIdMutation?.value as {nested:{enabled:boolean;labels:string[]}}).nested.enabled===true,"mutating getById result does not mutate persisted object");
+assert((byKeyAfterIdMutation?.value as {nested:{enabled:boolean;labels:string[]}}).nested.labels.join(",")==="original,stable","mutating getById result does not mutate persisted array");
+(byKeyAfterIdMutation!.value as {nested:{enabled:boolean;labels:string[]}}).nested.labels[1]="mutated-through-key-result";
+const byIdAfterKeyMutation=await mutationRepo.getById("mutation-config");
+assert((byIdAfterKeyMutation?.value as {nested:{enabled:boolean;labels:string[]}}).nested.labels.join(",")==="original,stable","mutating getByKeyAndScope result does not mutate persisted array");
+const snapshot=mutationRepo.snapshot();
+(snapshot[0].value as {nested:{enabled:boolean;labels:string[]}}).nested.labels.push("mutated-snapshot");
+assert(((await mutationRepo.getById("mutation-config"))?.value as {nested:{enabled:boolean;labels:string[]}}).nested.labels.join(",")==="original,stable","snapshot also returns defensive copies");
+await mutationRepo.save(createConfiguration({id:"mutation-config",key:"mutation.key",value:{nested:{enabled:false,labels:["updated"]}},scope:tenantScope}));
+assert(((await mutationRepo.getById("mutation-config"))?.value as {nested:{enabled:boolean;labels:string[]}}).nested.labels[0]==="updated","valid update persists a defensive copy");
+await rejects(()=>mutationRepo.save(createConfiguration({id:"mutation-config",key:"changed.key",value:true,scope:tenantScope})),Error,"repository prevents identity key mutation");
+await rejects(()=>mutationRepo.save(createConfiguration({id:"mutation-config",key:"mutation.key",value:true,scope:orgScope})),Error,"repository prevents identity scope mutation");
+console.log("PASS scope-key collision regressions and defensive-copy repository invariants");
