@@ -113,3 +113,28 @@ assert(((await mutationRepo.getById("mutation-config"))?.value as {nested:{enabl
 await rejects(()=>mutationRepo.save(createConfiguration({id:"mutation-config",key:"changed.key",value:true,scope:tenantScope})),Error,"repository prevents identity key mutation");
 await rejects(()=>mutationRepo.save(createConfiguration({id:"mutation-config",key:"mutation.key",value:true,scope:orgScope})),Error,"repository prevents identity scope mutation");
 console.log("PASS scope-key collision regressions and defensive-copy repository invariants");
+
+const protoSafeInput:Record<string,unknown>={nested:{safe:true}};
+Object.defineProperty(protoSafeInput,"__proto__",{value:{preserved:"proto-data",nested:{marker:7}},enumerable:true,configurable:true,writable:true});
+const protoSafeCreated=createConfiguration({id:"proto-safe-config",key:"proto.safe",value:protoSafeInput as never,scope:tenantScope});
+const ownProto=(value:unknown):Record<string,unknown>=>{
+  assert(value!==null && typeof value==="object" && !Array.isArray(value),"expected a JSON object");
+  return value as Record<string,unknown>;
+};
+const createdProtoValue=ownProto(protoSafeCreated.value);
+assert(Object.prototype.hasOwnProperty.call(createdProtoValue,"__proto__"),"createConfiguration preserves own __proto__ property");
+assert((ownProto(createdProtoValue["__proto__"])).preserved==="proto-data","createConfiguration preserves __proto__ property value");
+assert(Object.getPrototypeOf(createdProtoValue)===Object.prototype,"copying __proto__ does not change destination prototype");
+const protoSafeRepo=new InMemoryConfigurationRepository();
+await protoSafeRepo.save(protoSafeCreated);
+const savedProtoValue=ownProto((await protoSafeRepo.getById("proto-safe-config"))!.value);
+assert(Object.prototype.hasOwnProperty.call(savedProtoValue,"__proto__"),"save/getById preserves own __proto__ property");
+assert((ownProto(savedProtoValue["__proto__"])).preserved==="proto-data","save/getById preserves __proto__ value");
+assert(Object.getPrototypeOf(savedProtoValue)===Object.prototype,"save/getById retains ordinary object prototype");
+const keyedProtoValue=ownProto((await protoSafeRepo.getByKeyAndScope("proto.safe",tenantScope))!.value);
+assert(Object.prototype.hasOwnProperty.call(keyedProtoValue,"__proto__"),"getByKeyAndScope preserves own __proto__ property");
+assert((ownProto(keyedProtoValue["__proto__"])).preserved==="proto-data","getByKeyAndScope preserves __proto__ value");
+assert(Object.getPrototypeOf(keyedProtoValue)===Object.prototype,"getByKeyAndScope retains ordinary object prototype");
+(ownProto(savedProtoValue["__proto__"])).preserved="mutated-copy";
+assert((ownProto(ownProto((await protoSafeRepo.getById("proto-safe-config"))!.value)["__proto__"])).preserved==="proto-data","mutating returned __proto__ data does not mutate repository state");
+console.log("PASS own __proto__ JSON property preservation and prototype safety");
