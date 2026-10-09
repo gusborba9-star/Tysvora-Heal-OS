@@ -67,8 +67,17 @@ Cada fase depende de validação da anterior; sua presença não significa imple
 **EVIDÊNCIA:** o job `build-and-test` terminou com `completed / success`; `npm test` executou o build TypeScript e os testes de aplicação, autorização de papéis e Core.  
 **INFRAESTRUTURA EXTERNA:** nenhuma conectada.
 
-### Próxima execução
-**EXECUÇÃO 05:** NÃO INICIADA E NÃO AUTORIZADA. Qualquer execução futura depende de autorização explícita posterior do CTO.
+### Execução 05 — Core Configuration
+**STATUS: APROVADA FORMALMENTE PELO CTO**  
+**ESCOPO APROVADO:** configuração nos níveis tenant, organization, unit e module, com rejeição explícita de platform nesta execução.  
+**COMMIT DE IMPLEMENTAÇÃO DA CORREÇÃO FINAL:** `2254ec1a7f4859ff636bb47385c68412834494e2`  
+**COMMIT DOS TESTES DE REGRESSÃO / SHA FINAL VALIDADO:** `eadbf89fff0ebe22f3797bbf0191f15f7be002f1`  
+**VALIDAÇÃO CI:** CONCLUÍDA COM SUCESSO — `completed / success`  
+**GITHUB ACTIONS:** https://github.com/gusborba9-star/Tysvora-Heal-OS/actions/runs/37864216324  
+**EVIDÊNCIA:** o job `build-and-test` e as etapas de instalação de dependências, build TypeScript e suíte completa de testes terminaram com sucesso no workflow indicado.  
+**REGISTRO DOCUMENTAL NA BRANCH DE VALIDAÇÃO:** `eeb57e7ca2e689254821d3870c6bb9344d79bf8b` — https://github.com/gusborba9-star/Tysvora-Heal-OS/commit/eeb57e7ca2e689254821d3870c6bb9344d79bf8b  
+**PRESERVAÇÃO:** histórico anterior preservado; Blueprint e código não alterados por este registro documental; nenhuma infraestrutura externa conectada.  
+**FASE 3:** permanece **EM EXECUÇÃO** até que todas as capacidades previstas sejam implementadas e aprovadas formalmente. A aprovação da Execução 05 não encerra a Fase 3.
 
 ## FASE 4 — MODULE REGISTRY
 **STATUS: NÃO INICIADA**
