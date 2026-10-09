@@ -64,7 +64,7 @@ await rejects(()=>app.getById(tenantCtx,{id:"missing-config",scope:tenantScope})
 await rejects(()=>app.create(tenantCtx,{key:"invalid-json",value:undefined as never,scope:tenantScope}),Error,"non-JSON value rejected");
 assert(audit.snapshot().length===auditBefore && events.snapshot().length===eventBefore,"failed reads do not audit or publish success");
 assert(audit.snapshot().length===5 && events.snapshot().length===5,"each successful create/update emits audit and event");
-assert(policy.requests.every(request=>request.resource.startsWith("configuration:")),"authorization receives explicit scope resource");
+assert(policy.requests.every(request=>Array.isArray(JSON.parse(request.resource)) && (JSON.parse(request.resource) as unknown[])[0]==="configuration"),"authorization receives explicit structured scope resource");
 console.log("PASS configuration application, scope isolation, authorization, platform rejection and side-effect invariants");
 
 const collisionScopeA={level:"organization" as const,tenantId:"tenant:a",organizationId:"b"};
