@@ -59,7 +59,11 @@ function cloneJsonValue(value:unknown):ConfigurationJsonValue {
     const prototype=Object.getPrototypeOf(current);
     if(prototype!==Object.prototype && prototype!==null) throw new Error(path+" must contain only plain JSON objects");
     const result:Record<string,ConfigurationJsonValue>={};
-    for(const [key,item] of Object.entries(current as Record<string,unknown>)){if(item===undefined) throw new Error(path+"."+key+" must not be undefined");result[key]=visit(item,path+"."+key);}
+    for(const [key,item] of Object.entries(current as Record<string,unknown>)){
+      if(item===undefined) throw new Error(path+"."+key+" must not be undefined");
+      const cloned=visit(item,path+"."+key);
+      Object.defineProperty(result,key,{value:cloned,enumerable:true,configurable:true,writable:true});
+    }
     seen.delete(current as object);return result;
   };
   return visit(value,"configuration.value");
