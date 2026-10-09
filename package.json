@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "npm run build && node dist/tests/application.test.js && node dist/tests/platform-role-assignment.test.js && node dist/tests/core.test.js"
+    "test": "npm run build && node dist/tests/application.test.js && node dist/tests/platform-role-assignment.test.js && node dist/tests/core.test.js && node dist/tests/configuration.test.js"
   },
   "devDependencies": {
     "typescript": "^5.8.3"

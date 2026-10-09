@@ -11,3 +11,4 @@ export * from "./core/infrastructure/in-memory-repositories.js";
 export * from "./core/infrastructure/in-memory-audit-sink.js";
 export * from "./core/infrastructure/deterministic.js";
 export * from "./core/application/core.js";
+export * from "./core/application/configuration.js";
