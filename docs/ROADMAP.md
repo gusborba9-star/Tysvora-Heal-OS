@@ -34,7 +34,7 @@ Cada fase depende de validação da anterior; sua presença não significa imple
 
 ## FASE 3 — HEAL CORE
 **STATUS: EM EXECUÇÃO**  
-**EXECUÇÕES:** 03, 03A, 04, 04B
+**EXECUÇÕES:** 03, 03A, 04, 04B, 05
 
 **Objetivo:** implementar capacidades transversais.  
 **Entregáveis:** Core, organizações, unidades, usuários, configuração, eventos, auditoria, workflows e notificações autorizados.  
@@ -67,8 +67,17 @@ Cada fase depende de validação da anterior; sua presença não significa imple
 **EVIDÊNCIA:** o job `build-and-test` terminou com `completed / success`; `npm test` executou o build TypeScript e os testes de aplicação, autorização de papéis e Core.  
 **INFRAESTRUTURA EXTERNA:** nenhuma conectada.
 
-### Próxima execução
-**EXECUÇÃO 05:** NÃO INICIADA E NÃO AUTORIZADA. Qualquer execução futura depende de autorização explícita posterior do CTO.
+### Execução 05 — Core Configuration
+**STATUS:** IMPLEMENTADA / AGUARDANDO VALIDAÇÃO DO CTO  
+**COMMIT INICIAL:** `77f90e492c41c32b94e47b4116894c337c3a900d`  
+**COMMIT DA CORREÇÃO TIPADA:** `d457d74a3edd9fd2d52097f9ddf3764894b70d54`  
+**OBJETIVO:** implementar configuração nos escopos tenant, organization, unit e module, rejeitando explicitamente platform nesta execução.  
+**VALIDAÇÃO CI DA IMPLEMENTAÇÃO:** CONCLUÍDA COM SUCESSO  
+**SHA DA IMPLEMENTAÇÃO VALIDADA:** `d457d74a3edd9fd2d52097f9ddf3764894b70d54`  
+**GITHUB ACTIONS RUN:** https://github.com/gusborba9-star/Tysvora-Heal-OS/actions/runs/37863218100  
+**EVIDÊNCIA:** `npm test` concluiu o build TypeScript e as suítes `application.test.ts`, `platform-role-assignment.test.ts`, `core.test.ts` e `configuration.test.ts` com sucesso. Os testes de configuração cobrem rejeição de platform sem efeitos colaterais, isolamento entre tenants e escopos, autorização, duplicidade e invariantes de atualização.  
+**APROVAÇÃO DO CTO:** PENDENTE.  
+**INFRAESTRUTURA EXTERNA:** nenhuma conectada.
 
 ## FASE 4 — MODULE REGISTRY
 **STATUS: NÃO INICIADA**
