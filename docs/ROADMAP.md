@@ -76,6 +76,14 @@ Cada fase depende de validação da anterior; sua presença não significa imple
 **SHA DA IMPLEMENTAÇÃO VALIDADA:** `d457d74a3edd9fd2d52097f9ddf3764894b70d54`  
 **GITHUB ACTIONS RUN:** https://github.com/gusborba9-star/Tysvora-Heal-OS/actions/runs/37863218100  
 **EVIDÊNCIA:** `npm test` concluiu o build TypeScript e as suítes `application.test.ts`, `platform-role-assignment.test.ts`, `core.test.ts` e `configuration.test.ts` com sucesso. Os testes de configuração cobrem rejeição de platform sem efeitos colaterais, isolamento entre tenants e escopos, autorização, duplicidade e invariantes de atualização.  
+**CORREÇÕES FINAIS — COLISÕES DE ESCOPO E IMUTABILIDADE**  
+**COMMIT DE IMPLEMENTAÇÃO:** `1f7fc6464988cc8a341e5545fc4a66e31b6f0d11`  
+**COMMIT DE AJUSTE DE TESTE:** `c503351844a3fbadbb4c9900ced1d3b3b4d657c9`  
+**SHA FINAL VALIDADO:** `c503351844a3fbadbb4c9900ced1d3b3b4d657c9`  
+**VALIDAÇÃO CI:** CONCLUÍDA COM SUCESSO  
+**GITHUB ACTIONS RUN:** https://github.com/gusborba9-star/Tysvora-Heal-OS/actions/runs/37863670010  
+**RESULTADO REAL:** o workflow terminou em `completed / success` no SHA final acima. `npm test` executou `npm run build` (`tsc -p tsconfig.json`) e todas as quatro suítes: `application.test.ts`, `platform-role-assignment.test.ts`, `core.test.ts` e `configuration.test.ts`. As verificações de regressão de colisão de escopos, recursos de autorização estruturados, cópias defensivas, leitura e atualização passaram.  
+**PRESERVAÇÃO:** os três commits anteriores da Execução 05 foram preservados; `main` e Blueprint permanecem inalterados.  
 **APROVAÇÃO DO CTO:** PENDENTE.  
 **INFRAESTRUTURA EXTERNA:** nenhuma conectada.
 
