@@ -117,3 +117,20 @@ Este fechamento:
 A próxima frente é a **Fase 3 — Heal Core**, cujo estado histórico permanece EM EXECUÇÃO. Antes de ampliar código, deve-se auditar o estado real do Core e das execuções 03, 03A, 04, 04B e 05; confrontar contratos atuais com o modelo universal; fechar ADR-003 e definir o tratamento de ADR-004/016 que impacte identidade e tenancy; produzir plano de execução incremental com testes de regressão.
 
 Nenhum contrato já validado deve ser alterado sem ADR, evidência de incompatibilidade e regressão correspondente.
+
+
+## 9. Adendo documental — Easy Connect e superfícies de produto (2026-11-09)
+
+Após o fechamento documental da Fase 2A, a especificação foi ampliada para tornar explícitos:
+- Tysvora Easy Connect como experiência de autoatendimento institucional;
+- Tysvora Connector Agent opcional, baixado pelo navegador e instalado em ambiente institucional autorizado;
+- Universal Data Intake para upload, cadastro manual e CRM/ERP;
+- integração progressiva, sem exigir conectividade externa para iniciar o uso;
+- famílias adicionais de conectividade, Control Plane/Data Plane, SDK, mappings e lifecycle;
+- quatro experiências operacionais: Patient, Professional, Institution (Institutional Workspace Premium) e Field;
+- Tysvora Control Center como painel interno de administração da plataforma, distinto do painel institucional e sem privilégio clínico global por padrão;
+- ADR-019 (fronteiras administrativas) e ADR-020 (Easy Connect e Connector Agent).
+
+Este adendo complementa o fechamento documental da Fase 2A, sem reabrir nem alterar retroativamente seu escopo histórico. A documentação atualizada não comprova implementação, compatibilidade de qualquer fornecedor, segurança homologada do agente, usabilidade validada ou prontidão produtiva. Esses pontos permanecem sujeitos às fases, ADRs, testes e gates registrados no Roadmap.
+
+A Fase 3 — Heal Core — continua sendo o próximo gate de execução; nenhuma implementação de UIP, agente, painel ou integração é autorizada por este adendo.
