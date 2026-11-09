@@ -13,14 +13,16 @@ Não é apenas um prontuário, agenda, ERP ou aplicativo de mensagens. É uma in
 - especialidades médicas e multiprofissionais;
 - programas como tabagismo, diabetes, hipertensão, depressão, saúde mental, nutrição, pré-natal, reabilitação e outros;
 - saúde veterinária, com distinção entre sujeito animal e tutor/guardian;
-- experiências institucionais, paciente e equipes de campo;
-- integração com sistemas existentes e operação autônoma quando necessário.
+- experiências Patient, Professional, Institution (Institutional Workspace Premium) e Field;
+- Tysvora Control Center para administração interna da plataforma, segregado da operação institucional;
+- UIP com Easy Connect, Connector Agent opcional, APIs, bancos, arquivos, CRM/ERP, upload e cadastro manual;
+- integração progressiva com sistemas existentes e operação autônoma quando necessário.
 
 A lista é aberta. A presença de uma capacidade na documentação não comprova implementação.
 
 ## Princípio arquitetural
 
-Uma infraestrutura comum — Core, dados, integração, segurança, workflow e inteligência — combinada com adaptadores, configurações e módulos de domínio. Programas são entidades configuráveis e versionadas, não necessariamente módulos de código.
+Uma infraestrutura comum — Core, dados, UIP, segurança, workflow e inteligência — combinada com adaptadores, configurações e módulos de domínio. Easy Connect permite onboarding e integração self-service progressiva; Connector Agent executa acesso local autorizado. Patient, Professional, Institution e Field são experiências distintas. Control Center administra a plataforma sem acesso clínico global. Programas são entidades configuráveis e versionadas, não necessariamente módulos de código.
 
 ## Estado real do repositório
 
