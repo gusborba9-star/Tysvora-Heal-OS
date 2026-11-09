@@ -21,11 +21,12 @@ A arquitetura técnica existente permanece como base; documentos são atualizado
 
 ## FASE 2A — PRODUCT & ARCHITECTURE LOCK
 **STATUS: CONCLUÍDA/APROVADA — ESCOPO DOCUMENTAL (2026-11-09)**
-Objetivo: alinhar Blueprint, experiências, domínio universal, programas, jornadas, governança clínica, integração, dados e benchmark.
+Objetivo: alinhar Blueprint, experiências Patient/Professional/Institution/Field, fronteira do Control Center, Institutional Workspace Premium, domínio universal, programas, jornadas, governança clínica, UIP/Easy Connect, Connector Agent, Universal Data Intake e benchmark.
 Entregáveis:
 - Blueprint 2.0;
 - Roadmap 2.0;
-- Product Experience;
+- Product Experience — Patient, Professional, Institution, Field e Control Center;
+- Easy Connect, Connector Agent e Universal Data Intake especificados na UIP;
 - Domain Model 2.0;
 - Program Engine;
 - Care Continuity;
@@ -60,7 +61,7 @@ Objetivo: identidade, RBAC + ABAC/contexto, tenancy, multi-instituição, consen
 Gate: testes negativos entre tenants, organizações, unidades, programas, CareSubject e Guardian; revogação, purpose limitation e break-glass auditados. É pré-requisito para dados reais em engines e conectores.
 
 ## FASE 6 — UNIVERSAL ENGINES, UIP & EASY CONNECT FOUNDATION
-**Dependências:** contratos da Fase 3; controles mínimos da Fase 5; ADR-002, ADR-008 e ADR-017 para produção de eventos/conectores/comunicação.
+**Dependências:** contratos da Fase 3; controles mínimos da Fase 5; ADR-002, ADR-008, ADR-017 e ADR-020 para produção de eventos/conectores/comunicação e agente local.
 Objetivo: contratos e capacidades compartilhadas de workflow, tarefas, notificações, documentos, busca, comunicação, UIP, proveniência e autoatendimento.
 Entregas incrementais: Control Plane/Data Plane; Connector SDK/Registry/manifests/contracts/capability negotiation/conformance; Easy Connect guiado; Universal Data Intake (upload, manual, CRM/ERP); API, Database, File/Document, Secure Transfer e padrões de saúde; Connector Agent com pareamento/assinatura/atualização/revogação; mappings, lineage, qualidade, identidade governada, sincronização e reconciliação.
 Gate: onboarding self-service testado; conector por família priorizada; importação com preview/quarentena/aprovação; agente com threat model e atualização segura; E2E com idempotência, falha, retry, replay, conflito, reconciliação, auditoria e isolamento. Nenhuma integração produtiva antes dos ADRs e gates aplicáveis.
