@@ -24,6 +24,8 @@
 | ADR-016 | Estratégia de tenancy e fronteiras Organization/Unit/Program | ABERTO — BLOQUEIA F5 | compatibilidade com Core atual, modelo de acesso e testes negativos |
 | ADR-017 | Modelo de comunicação, canais, entrega e contingência | ABERTO — BLOQUEIA CANAL PRODUTIVO | separar mensagem, notificação e ocorrência; definir SLA, contingência e confirmação |
 | ADR-018 | Modelo de programa configurável e linguagem declarativa segura | ABERTO — BLOQUEIA F7 | limites entre configuração, protocolo e código; validação e sandbox de configuração |
+| ADR-019 | Separação Control Center, Institutional Workspace e experiências | ABERTO — BLOQUEIA ADMIN PRIVILEGIADA | fronteira entre superadmin Tysvora e administrador institucional; metadados vs conteúdo clínico; suporte excepcional, break-glass, auditoria e segregação |
+| ADR-020 | Easy Connect self-service e Connector Agent | ABERTO — BLOQUEIA AGENTE PRODUTIVO | threat model, pareamento, identidade de máquina, canal outbound, atualização assinada, credenciais locais, comandos allowlisted, revogação e UX de homologação |
 
 ## Ordem sugerida
 
@@ -32,6 +34,7 @@
 3. ADR-007 e ADR-015: documentos e assinatura regulada.
 4. ADR-006, ADR-012 e ADR-013: governança legal e operação.
 5. ADR-001, ADR-010 e ADR-011: topologia, busca e analytics.
-6. ADR-014 e ADR-018: IA e configuração declarativa avançada.
+6. ADR-019 e ADR-020: fronteiras administrativas, self-service e agente local.
+7. ADR-014 e ADR-018: IA e configuração declarativa avançada.
 
 A ordem é uma proposta de decisão documental; não autoriza implementação. ADRs podem ser reordenados se dependências forem registradas.
