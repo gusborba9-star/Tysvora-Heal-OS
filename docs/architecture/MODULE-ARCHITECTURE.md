@@ -1,89 +1,41 @@
-# Tysvora Heal OS — Module Architecture
+# Tysvora Heal OS — Module & Capability Architecture
 
-## 1. Principle
+## 1. Distinções
 
-A module is a bounded capability package built on shared Core contracts. It is not a separate product and must not duplicate Core identity, tenancy, authorization or audit.
+- **Engine:** capacidade compartilhada com contrato estável.
+- **Module:** pacote de software delimitado que entrega uma capacidade de domínio.
+- **Program:** configuração operacional versionada, composta por engines, workflows, protocolos e módulos.
+- **Protocol:** artefato técnico/profissional versionado e aprovado.
+- **Vertical adapter:** adaptação de terminologia, regras, dados e integrações de um domínio.
 
-## 2. Module contract
+Não criar um módulo de código para cada programa quando a diferença puder ser representada por configuração segura.
 
-Each module must conceptually declare:
+## 2. Manifesto de módulo
 
-- Module;
-- Module Manifest;
-- Module Version;
-- Module Dependencies;
-- Module Permissions;
-- Module Configuration;
-- Module Routes;
-- Module Events;
-- Module Data;
-- Module Integrations;
-- Module Health;
-- Module Lifecycle.
+Cada módulo declara: identificador, nome, owner, versão, compatibilidade Core, dependências, permissões, escopos, dados, migrações, APIs, eventos, configuração, integrações, feature flags, health checks, política de upgrade/downgrade, exportação e desativação.
 
-## 3. Lifecycle
+## 3. Ciclo de vida
 
-```
-AVAILABLE
-   ↓
-CONTRACTED
-   ↓
-CONFIGURING
-   ↓
-HOMOLOGATING
-   ↓
-ACTIVE
-   ↓
-SUSPENDED
-   ↓
-DEACTIVATED
-```
+DISCOVERED → AVAILABLE → CONTRACTED → CONFIGURING → HOMOLOGATING → ACTIVE → SUSPENDED → DEACTIVATED → RETIRED.
 
-Transitions must be controlled and auditable.
+Transições exigem autorização, pré-condições, auditoria e plano de reversão quando aplicável. Estado comercial não substitui estado técnico.
 
-## 4. Module Registry
+## 4. Registry e catálogo
 
-The Module Registry is the authority for:
+Registry é autoridade técnica para versão, dependências, compatibilidade, ativação e saúde. Catálogo pode apresentar capacidades comerciais. Configuração não concede permissões; feature flag não é controle de segurança.
 
-- existence;
-- version;
-- dependencies;
-- availability;
-- configuration;
-- activation state.
+## 5. Programas
 
-It does not replace commercial contracts or operational homologation; it records and enforces the technical state permitted by them.
+Program Engine compõe capacidades sem confundir enrollment com ativação de módulo. Programa possui template, versão, vigência, elegibilidade, etapas, metas, instrumentos, protocolos, papéis, tarefas, indicadores, comunicação, integrações e regras de saída.
 
-## 5. Dependencies
+## 6. Extensibilidade
 
-Modules must declare dependencies. Example:
+Preferência: configuração declarativa validada → adapter de domínio → módulo específico → serviço independente somente quando justificado. Fork por cliente é exceção com ADR e custo de manutenção explícito.
 
-```
-Tysvora Vacinas
- ├── Identity
- ├── Patient Context
- ├── Notifications
- └── Integration Gateway
-```
+## 7. Propriedade de dados
 
-The example is conceptual.
+Cada bounded context é dono de suas regras e dados. Contratos de leitura/escrita são explícitos. Nenhum módulo redefine tenancy, identidade ou autorização global.
 
-## 6. Data ownership
+## 8. Migração e compatibilidade
 
-A module owns its domain data within global Core tenancy, security and audit constraints. It cannot redefine tenant boundaries.
-
-## 7. Routes and events
-
-Modules expose domain-oriented routes and publish/consume governed events. Route names and event contracts must be versioned.
-
-## 8. Health
-
-Each module must expose a standardized health/status concept sufficient for Module Registry and operations to determine whether it is available and healthy.
-
-## 9. Configuration
-
-Module configuration is scoped to the appropriate tenant/organization/unit and must not be confused with authorization.
-
-## 10. No-fork principle
-
-Municipal or private variations should be represented by configuration, policies, workflows, integrations and module activation whenever the underlying capability is the same. Forking the application for a customer is an exception requiring explicit architectural approval.
+Mudanças de manifest, schema e API são versionadas. Upgrade deve validar dependências, preservar histórico, permitir rollback compatível e registrar migrações. Desativação não elimina dados regulados.

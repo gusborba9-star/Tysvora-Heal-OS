@@ -2,54 +2,47 @@
 
 ## Posicionamento
 
-O **Tysvora Heal OS** é um sistema operacional modular de infraestrutura de saúde voltado a ambientes assistenciais, operacionais, clínicos e inteligentes.
+**Tysvora Heal OS** é uma plataforma universal de cuidado, programas e continuidade. Conecta organizações, profissionais, pessoas, sujeitos de cuidado, sistemas externos e operações para que o cuidado continue após cada atendimento.
 
-O Tysvora não é apenas um prontuário eletrônico. A visão do projeto é uma plataforma modular capaz de atender diferentes organizações de saúde, incluindo ambientes públicos e privados, mantendo um núcleo comum e módulos configuráveis.
+Não é apenas um prontuário, agenda, ERP ou aplicativo de mensagens. É uma infraestrutura adaptável que pode operar diferentes verticais, especialidades, programas e linhas de cuidado sobre capacidades compartilhadas.
 
-## Princípio central
+## O que a plataforma pretende suportar
 
-Construir uma infraestrutura única, modular e evolutiva na qual capacidades previamente arquitetadas possam ser contratadas, configuradas, homologadas e ativadas sem a criação de uma nova aplicação independente para cada município ou organização.
+- Saúde pública, municípios, UBS, redes e serviços privados;
+- clínicas, consultórios e profissionais;
+- especialidades médicas e multiprofissionais;
+- programas como tabagismo, diabetes, hipertensão, depressão, saúde mental, nutrição, pré-natal, reabilitação e outros;
+- saúde veterinária, com distinção entre sujeito animal e tutor/guardian;
+- experiências institucionais, paciente e equipes de campo;
+- integração com sistemas existentes e operação autônoma quando necessário.
 
-## Escopo conceitual
+A lista é aberta. A presença de uma capacidade na documentação não comprova implementação.
 
-A visão do Tysvora Heal OS contempla, sem pressupor implementação nesta fase:
+## Princípio arquitetural
 
-- Assistência
-- Operação
-- Gestão
-- Inteligência
-- Apoio à decisão profissional
-- Integrações
-- IA
-- Analytics
-- Sentinela
-- Módulos verticais de saúde
+Uma infraestrutura comum — Core, dados, integração, segurança, workflow e inteligência — combinada com adaptadores, configurações e módulos de domínio. Programas são entidades configuráveis e versionadas, não necessariamente módulos de código.
+
+## Estado real do repositório
+
+O Heal Core possui contratos e implementações iniciais documentados. Consulte:
+- `docs/core/CORE-FOUNDATION.md`
+- `docs/core/APPLICATION-LAYER.md`
+- `docs/ROADMAP.md`
+
+Não confundir visão/roadmap com funcionalidade entregue. Persistência de produção, integrações, experiências completas, programas, engines clínicos, Sentinela e operação produtiva só podem ser considerados implementados quando houver código e evidências específicas.
 
 ## Governança documental
 
-```
-BLUEPRINT
-   ↓
-ROADMAP
-   ↓
-EXECUÇÕES
-   ↓
-CÓDIGO
-```
+`BLUEPRINT.md` define produto e princípios.  
+`ROADMAP.md` define sequência e gates.  
+Especificações definem contratos.  
+Execuções autorizam escopo.  
+Código implementa.
 
-- **BLUEPRINT** — visão, princípios e arquitetura conceitual.
-- **ROADMAP** — sequência macro de execução.
-- **EXECUÇÃO** — instrução específica emitida pelo CTO.
-- **CÓDIGO** — implementação concreta.
+## Relação com Veritas-OS
 
-Em conflito, prevalece: instrução atual do CTO → Blueprint → Roadmap → implementação existente.
-
-## Relação com o Veritas-OS
-
-O Tysvora Heal OS não incorpora código do Veritas-OS nesta fase. Componentes conceituais potencialmente reutilizáveis serão avaliados posteriormente na FASE 7 segundo **REUTILIZAR, ADAPTAR, DESCARTAR ou RECONSTRUIR**.
+Nenhum código do Veritas-OS é presumido incorporado. Reutilização futura exige avaliação explícita de REUTILIZAR / ADAPTAR / DESCARTAR / RECONSTRUIR, com segurança, domínio e dependências verificadas.
 
 ## Status
 
-**Em construção — Fase 3: Heal Core**
-
-Nesta fase, o repositório contém exclusivamente a fundamentação documental e de governança inicial. Não há funcionalidades de produto implementadas.
+Em construção. Fase 3 — Heal Core — permanece com o estado histórico registrado no Roadmap. Esta documentação não declara nova funcionalidade implementada nem autoriza expansão de código.

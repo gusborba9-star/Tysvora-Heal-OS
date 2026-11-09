@@ -1,68 +1,29 @@
 # Tysvora Heal OS — API Architecture
 
-## 1. Boundary
+## 1. Princípio
 
-APIs expose application/domain capabilities. They are not direct table CRUD contracts.
+APIs expõem casos de uso e contratos de domínio, nunca CRUD indiscriminado de tabelas. Rotas versionadas; convenção inicial /api/v1.
 
-Initial convention:
+## 2. Fronteiras
 
-```
-/api/v1/...
-```
+API Gateway aplica autenticação, contexto, autorização, rate limits, correlation, validação, observabilidade e políticas. Bounded contexts mantêm APIs próprias com contratos estáveis.
 
-Examples are conceptual only:
+## 3. Contratos
 
-```
-/api/v1/patients
-/api/v1/appointments
-/api/v1/modules
-/api/v1/pharmacy
-```
+OpenAPI ou mecanismo equivalente, schema validation, versionamento, compatibilidade, depreciação e documentação. Idempotency keys em comandos mutáveis/retryable. Paginação limitada e filtros allowlisted.
 
-## 2. API Gateway
+## 4. Segurança
 
-A gateway/boundary layer should centralize cross-cutting concerns such as authentication context, authorization enforcement, rate limiting, correlation IDs, observability and request policy.
+Default deny, tenant/context propagation, autorização no servidor, validação de entrada e saída, proteção contra mass assignment, safe errors, quotas e limites de payload. Não confiar em tenant_id enviado pelo cliente sem validar contexto.
 
-The exact gateway implementation is **DECISION PENDING**.
+## 5. Integrações
 
-## 3. Versioning
+APIs internas não devem expor diretamente tabelas. APIs externas usam escopos, client identity, versionamento, quotas, webhooks assinados, replay protection e rotação de credenciais.
 
-Publicly consumed contracts are versioned. Breaking changes require a new contract/version and migration/deprecation strategy.
+## 6. Dados e auditoria
 
-## 4. Authentication and authorization
+Mutações sensíveis geram audit e eventos confiáveis. Respostas minimizam dados clínicos e respeitam purpose limitation. Correlation IDs atravessam serviços e conectores.
 
-Authentication establishes identity; authorization evaluates tenant, role, permission and contextual policy. APIs must never infer authorization from route naming alone.
+## 7. Operação
 
-## 5. Idempotency
-
-Mutating operations that may be retried must support idempotency semantics where duplicate execution would be harmful.
-
-## 6. Pagination, filtering and sorting
-
-Collection endpoints should use bounded pagination. Filtering and sorting must use an allowlisted contract, not arbitrary database expressions.
-
-## 7. Validation
-
-Validate input at the API boundary and again at domain invariants where necessary. Never trust client-side validation.
-
-## 8. Errors
-
-Use stable machine-readable error codes with safe human-readable messages. Do not expose stack traces, SQL details, secrets or sensitive internal state.
-
-## 9. Rate limits
-
-Rate limits should be defined by risk and resource type, with stricter policies for authentication, AI and expensive operations.
-
-## 10. Observability
-
-Requests should carry correlation IDs. Logs and metrics must capture latency, outcome and resource identifiers without exposing unnecessary sensitive data.
-
-## 11. Auditability
-
-Business/clinical mutations requiring audit must emit auditable records independently of ordinary technical logs.
-
-## 12. Domain orientation
-
-API boundaries should follow domain capabilities rather than database tables. Modules own module endpoints while shared capabilities remain Core APIs.
-
-No endpoint is implemented in this execution.
+Timeout, retry policy, circuit breaker quando aplicável, rate limits, SLOs, tracing e contract tests. Nenhum endpoint é considerado implementado por estar especificado.

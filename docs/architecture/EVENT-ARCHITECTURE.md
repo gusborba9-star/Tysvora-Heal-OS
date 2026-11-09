@@ -1,60 +1,34 @@
 # Tysvora Heal OS — Event Architecture
 
-## 1. Purpose
+## 1. Propósito
 
-Events provide a decoupled mechanism for important system facts, module reactions, observability and integrations.
+Eventos representam fatos de domínio, integrações e operação. Não são sinônimo de log, notificação ou comando.
 
-Examples:
+## 2. Categorias
 
-- `patient.created`
-- `appointment.created`
-- `appointment.missed`
-- `module.activated`
-- `inventory.low`
-- `inventory.expiring`
-- `referral.stalled`
-- `notification.sent`
-- `ai.requested`
-- `ai.completed`
+- Domain event: fato ocorrido no domínio.
+- Integration event: contrato externo publicado.
+- Command: solicitação de ação.
+- Notification: intenção de entrega.
+- Audit record: trilha de ação/acesso.
+- Technical log/metric/trace: diagnóstico operacional.
 
-These are conceptual event names.
+## 3. Envelope mínimo
 
-## 2. Event envelope
+event_id, event_type, schema_version, occurred_at, recorded_at, tenant_id quando aplicável, organization/unit context, actor/source, subject/reference, correlation_id, causation_id, idempotency_key, payload e classificação de sensibilidade.
 
-Each governed event should contain:
+## 4. Semântica
 
-- event name;
-- event ID;
-- tenant ID when tenant-scoped;
-- timestamp;
-- actor/context where applicable;
-- source;
-- version;
-- payload;
-- correlation ID.
+Assumir at-least-once até prova em contrário; consumidores idempotentes. Eventos são imutáveis; correções produzem novos fatos. Ordenação é definida por agregado/stream quando necessária. Não prometer exactly-once.
 
-## 3. Event categories
+## 5. Eventos de programa e cuidado
 
-**Domain event:** a meaningful fact inside the domain.
+Exemplos conceituais: program.enrollment.created, program.stage.changed, care.event.reported, care.event.triaged, care.plan.versioned, care.task.assigned, care.task.completed, encounter.closed, prescription.issued, integration.record.reconciled. Eventos não expõem dados clínicos desnecessários no payload.
 
-**Integration event:** a contract intended for external consumers/adapters.
+## 6. Confiabilidade
 
-**Technical log:** operational diagnostic information; not a domain fact and not a substitute for audit.
+Para eventos críticos, usar padrão transacional apropriado (ex.: outbox) quando aprovado. Retry com backoff, dead-letter, replay controlado, deduplicação, schema registry/compatibilidade e observabilidade. Broker permanece ADR.
 
-## 4. Guarantees
+## 7. Segurança
 
-Consumers must assume at-least-once delivery unless a later implementation explicitly establishes stronger semantics. Therefore handlers must be idempotent.
-
-Events are immutable facts; corrections are represented through subsequent events rather than mutating historical event meaning.
-
-## 5. Versioning
-
-Event contracts require explicit versions. Breaking payload changes require a new version or migration strategy.
-
-## 6. Broker
-
-A specific broker is **DECISION PENDING**. Selection must consider workload, ordering, retry semantics, durability, cost and operational burden.
-
-## 7. Transactional publication
-
-The implementation should use a reliable transaction-to-event strategy for critical domain events; exact mechanism is **DECISION PENDING** and must be resolved before production event processing.
+Autorização de produtor/consumidor, classificação de payload, segregação por tenant, retenção e acesso auditado. Eventos não são canal para contornar autorização.

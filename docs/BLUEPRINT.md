@@ -1,224 +1,270 @@
-# Tysvora Heal OS — Blueprint
+# Tysvora Heal OS — Blueprint 2.0
 
-**Status:** Documento normativo de visão e arquitetura conceitual.  
-**Fase:** 1 — Fundação.
+**Status:** Proposta arquitetural consolidada para aprovação do CTO.  
+**Natureza:** normativa para visão e arquitetura; não comprova implementação.  
+**Regra:** este documento não autoriza alteração de código, banco, infraestrutura ou produção.
 
-## 1. Identidade do sistema
+## 1. Identidade e posicionamento
 
-### Tysvora Systems
-**Tysvora Systems** é a identidade organizacional/ecossistêmica sob a qual o produto é concebido.
+**Tysvora Systems** é a identidade organizacional do ecossistema.  
+**Tysvora Heal OS** é uma plataforma universal de cuidado, programas e continuidade.
 
-### Tysvora Heal OS
-**Tysvora Heal OS** é o sistema operacional modular de infraestrutura de saúde.
+**Categoria:** Universal Care, Program & Continuity Platform.
 
-### Tysvora Saúde
-**Tysvora Saúde** pode ser utilizado como linguagem de apresentação pública, sem substituir a identidade formal do produto Tysvora Heal OS.
+**Tese:** o cuidado não termina quando o paciente sai da instituição; tampouco deve ficar preso ao sistema em que foi registrado.
 
-### Propósito
-Fornecer uma infraestrutura modular, evolutiva e governável para conectar assistência, operação, inteligência, gestão e integração em uma arquitetura única.
+O Tysvora conecta organizações, profissionais, pessoas, sujeitos de cuidado, programas, jornadas, dados e operações. Atua como infraestrutura de coordenação e continuidade sobre sistemas existentes, sem exigir sua substituição. Pode também atender organizações sem sistema adequado.
 
-## 2. Visão
+## 2. Objetivo do produto
 
-Uma infraestrutura modular de saúde capaz de conectar assistência, operação, inteligência, gestão e integração em uma arquitetura única, permitindo que diferentes organizações ativem capacidades conforme necessidades, contratos, configurações, homologações e requisitos de segurança.
+Permitir que qualquer organização configure e opere verticais, especialidades, programas e linhas de cuidado sobre uma infraestrutura comum, preservando regras e responsabilidades específicas de cada domínio.
 
-## 3. Princípios fundamentais
+A plataforma deve:
+- conectar o cuidado realizado, o profissional responsável e a pessoa acompanhada;
+- receber manifestações e dados de múltiplas origens;
+- reconstruir contexto relevante com fonte, autoria e atualização;
+- transformar eventos em trabalho profissional e operacional;
+- acompanhar planos, programas, tarefas, resultados e reavaliações;
+- coordenar operações presenciais, remotas e de campo;
+- oferecer inteligência operacional e analítica governada;
+- integrar-se a sistemas externos sem acoplamento a um fornecedor.
 
-- modularidade;
-- multi-tenancy;
+## 3. Problemas que resolve
+
+- Fragmentação de dados e sistemas;
+- perda de continuidade após consultas e atendimentos;
+- dificuldade de identificar quem deve agir e quando;
+- comunicação sem contexto clínico ou operacional;
+- programas isolados e pouco mensuráveis;
+- reconstrução manual de histórico;
+- encaminhamentos, retornos e visitas sem coordenação;
+- baixa visibilidade de filas, capacidade e pendências;
+- integrações frágeis, proprietárias ou inexistentes.
+
+## 4. Conceitos que não podem ser confundidos
+
+| Conceito | Definição |
+|---|---|
+| Vertical | Domínio de atuação, como saúde pública, clínica privada ou veterinária |
+| Especialidade | Campo profissional ou técnico, como cardiologia, nutrição ou psicologia |
+| Programa | Iniciativa estruturada com público, elegibilidade, objetivos, jornada, equipe e indicadores |
+| Linha de cuidado | Articulação de serviços e profissionais ao longo do percurso |
+| Protocolo | Regras e recomendações técnico-profissionais versionadas e governadas |
+| Módulo | Pacote de software que entrega capacidades de domínio |
+| Configuração | Parâmetros e composição de capacidades existentes |
+| Jornada | Percurso individual de cuidado ou serviço ao longo do tempo |
+
+Programa não é sinônimo de módulo. Especialidade não é sinônimo de vertical. Protocolo não é uma decisão autônoma do sistema.
+
+## 5. Ambientes e domínios suportados
+
+A arquitetura deverá comportar, sem catálogo fechado:
+- SUS, secretarias, municípios, redes, hospitais, UBS e serviços públicos;
+- clínicas, consultórios, redes privadas e profissionais independentes;
+- medicina, enfermagem, nutrição, psicologia, psiquiatria, odontologia, fisioterapia e outras profissões;
+- programas de tabagismo, diabetes, hipertensão, depressão, saúde mental, obesidade, pré-natal, reabilitação, saúde da criança, saúde do idoso, doenças infecciosas, cuidados paliativos e outros;
+- saúde animal e serviços veterinários.
+
+A presença de um domínio no Blueprint não significa que ele esteja implementado, homologado ou juridicamente autorizado.
+
+## 6. Experiências de produto
+
+As experiências são interfaces sobre a mesma plataforma, não produtos isolados:
+
+1. **Tysvora Institution:** gestão institucional, equipes, programas, jornadas, contexto assistencial, comunicação, indicadores, configurações e integrações.
+2. **Tysvora Patient:** uma identidade de acesso para múltiplos relacionamentos institucionais, com isolamento e permissões independentes.
+3. **Tysvora Field:** execução externa, visitas, tarefas, agendas, rotas, evidências e encerramento.
+
+Uma pessoa pode estar vinculada a várias instituições e programas. A interface deve deixar claro em qual contexto institucional o usuário está operando.
+
+## 7. Princípios arquiteturais
+
+- Core universal e independente de vertical;
 - configuração sobre duplicação;
-- segurança por design;
-- privacidade por design;
-- auditabilidade;
-- interoperabilidade;
-- observabilidade;
-- escalabilidade;
-- infraestrutura agnóstica;
-- separação entre Core e módulos;
-- separação entre regras determinísticas e IA;
-- IA como apoio e não autoridade autônoma;
-- evolução incremental;
-- versionamento;
-- reversibilidade;
-- governança.
+- extensões de domínio sem forks por cliente;
+- contratos explícitos e versionados;
+- interoperabilidade e substituição de fornecedores;
+- proveniência e linhagem dos dados;
+- isolamento multi-tenant e multi-institucional;
+- segurança, privacidade e finalidade por design;
+- menor privilégio e autorização contextual;
+- auditabilidade de ações e decisões;
+- resiliência, idempotência e recuperação;
+- acessibilidade, experiência móvel e operação offline controlada quando necessária;
+- observabilidade técnica, operacional e de negócio;
+- IA substituível, governada e subordinada a regras determinísticas e autoridade profissional;
+- evolução incremental com gates verificáveis.
 
-## 4. Arquitetura conceitual
+## 8. Arquitetura em camadas
 
-```
-TYSVORA SYSTEMS
-        │
-        ▼
-TYSVORA HEAL OS
-        │
-        ▼
-HEAL CORE
-        │
-        ├── Identity
-        ├── Organizations
-        ├── Units
-        ├── Users
-        ├── RBAC
-        ├── Audit
-        ├── Events
-        ├── Workflows
-        ├── Notifications
-        ├── Configuration
-        ├── Integrations
-        ├── AI Gateway
-        ├── Analytics
-        ├── Sentinela
-        └── Module Registry
-                 │
-                 ▼
-              MODULES
-```
+1. **Universal Core:** identidade, tenancy, organizações, unidades, profissionais, permissões, relacionamentos, configuração, auditoria, eventos e governança.
+2. **Universal Data & Integration:** conectores, ingestão, validação, normalização, proveniência, reconciliação, interoperabilidade e sincronização.
+3. **Domain Adaptation:** verticais, especialidades, programas, linhas de cuidado, protocolos, terminologias e regras específicas.
+4. **Care & Service Operations:** jornadas, planos, intake, comunicação, tarefas, coordenação, visitas, acompanhamento e encerramento.
+5. **Intelligence:** Sentinela, analytics, indicadores, capacity optimization e apoio à decisão.
+6. **Experience & Delivery:** interfaces Institution, Patient e Field, APIs, deployment, configuração e operação.
 
-Este diagrama é conceitual e não define framework, banco ou infraestrutura.
+Segurança, governança, observabilidade e auditoria atravessam todas as camadas.
 
-## 5. Modelo de módulos
+## 9. Motores universais
 
-Módulos deverão ser componentes independentes sobre capacidades compartilhadas do Core.
+- Identity & Access Engine;
+- Organization & Relationship Engine;
+- Care Context & Longitudinal Record Engine;
+- Universal Integration & Data Adaptation Engine;
+- Program Engine;
+- Care Pathway & Continuity Engine;
+- Care Intake & Triage Orchestration;
+- Care Plan & Clinical Document Engine;
+- Workflow & Task Engine;
+- Patient Engagement & Communication Engine;
+- Follow-up Engine;
+- Field Operations Engine;
+- Clinical Governance & Protocol Engine;
+- Notification Engine;
+- Sentinela & Intelligence Engine;
+- Analytics & Capacity Optimization Engine;
+- AI Gateway.
 
-```
-DISPONÍVEL
-     ↓
-CONTRATADO
-     ↓
-HOMOLOGAÇÃO
-     ↓
-ATIVO
-     ↓
-DESATIVADO
-```
+A separação em motores é conceitual e de responsabilidade; não exige microserviços independentes. A topologia de implantação será decidida por evidência de escala, segurança e operação.
 
-A ativação de módulos conhecidos deve ser predominantemente configuração, respeitando dependências, permissões, contrato, homologação e integrações. Isso não significa que novas capacidades jamais exigirão desenvolvimento.
+## 10. Programas como capacidade de primeira classe
 
-## 6. Multi-tenancy
+O Program Engine deve permitir modelar e operar programas sem criar um novo sistema ou módulo para cada programa.
 
-O sistema deverá suportar múltiplas organizações/tenants sem misturar seus dados, configurações, usuários, permissões ou regras. A estratégia física exata de isolamento fica para a arquitetura técnica.
+Cada programa poderá declarar:
+- identidade, finalidade, público e instituição responsável;
+- elegibilidade, inclusão, exclusão e critérios de saída;
+- template, versão, vigência e aprovação;
+- etapas, estados, transições e prazos;
+- equipe, papéis e responsabilidades;
+- plano, metas, intervenções e avaliações;
+- protocolos e instrumentos aplicáveis;
+- tarefas, comunicação e escalonamentos;
+- indicadores de processo, resultado e segurança;
+- integrações, fontes de dados e requisitos de consentimento/base legal;
+- regras de encerramento, transferência e reentrada.
 
-## 7. Público-alvo conceitual
+Programas podem ser configurados por organização, rede, município ou unidade, dentro de limites de governança. Alterações de versão não devem reescrever inscrições e decisões históricas.
 
-- municípios;
-- redes públicas;
-- clínicas;
-- organizações privadas de saúde;
-- redes de saúde;
-- profissionais;
-- gestores;
-- pacientes/usuários finais, quando aplicável.
+## 11. Modelo universal de domínio
 
-## 8. Camadas funcionais
+Entidades conceituais centrais:
+- Tenant, Organization, Unit, Team;
+- Person, UserIdentity, Professional, CareSubject, Guardian;
+- CareRelationship, InstitutionalMembership, ConsentRecord;
+- VerticalDefinition, SpecialtyDefinition, ProgramDefinition, ProgramVersion, ProgramEnrollment;
+- CarePathway, PathwayStage, Protocol, ProtocolVersion;
+- Encounter, CarePlan, CarePlanVersion, CareEvent, CareTask;
+- CareOrder, Prescription, ClinicalDocument, Assessment;
+- SourceRecord, ExternalIdentifier, DataLineage;
+- Workflow, Notification, IntegrationConnection, AuditEntry.
 
-**Core:** identidade, organizações, unidades, permissões, auditoria, eventos, configuração etc.
+Person é a pessoa natural. CareSubject é quem recebe cuidado e pode ser humano ou animal. Guardian é a pessoa autorizada a representar um sujeito, quando aplicável. Identidade de login não é relacionamento assistencial. A modelagem definitiva deve preservar limites de domínio e evitar um prontuário universal monolítico.
 
-**Assistencial:** atendimento, acompanhamento, agenda, encaminhamentos e continuidade.
+## 12. Ciclo universal de cuidado/serviço
 
-**Operacional:** farmácia, estoque, agenda, fluxos, tarefas e capacidade.
+Origem e vínculo → contexto → atendimento/inscrição → plano/jornada → manifestações e acompanhamento → avaliação profissional → decisão → coordenação e execução → resultado → reavaliação, transferência ou encerramento.
 
-**Clinical Intelligence:** protocolos, cálculos, evidências, segurança e apoio à decisão.
+O fluxo pode variar por vertical e programa. Nem toda interação é evento clínico; nem toda tarefa é decisão clínica.
 
-**Intelligence:** analytics, indicadores, padrões, alertas e Sentinela.
+Distinções obrigatórias: mensagem, relato, manifestação, sinal de risco, ocorrência, avaliação, decisão profissional, orientação, prescrição/ordem, tarefa, confirmação de recebimento, adesão autorrelatada, resultado medido e evolução profissional.
 
-**AI:** gateway e capacidades de IA com governança.
+## 13. Contexto longitudinal e workspace profissional
 
-**Integration:** integrações externas e adapters.
+O Unified Care Workspace apresenta apenas informação necessária à finalidade e ao profissional autorizado:
+- identificação e vínculo;
+- instituição, unidade, programa e equipe;
+- histórico relevante com fonte e data;
+- estado atual, manifestação e prioridade;
+- plano, ordens e documentos vigentes;
+- pendências e ações disponíveis.
 
-**Deployment:** distribuição, versionamento, homologação e implantação.
+Não é cópia integral de todos os prontuários. Deve preservar autoria, fonte, temporalidade, confiabilidade e limites de acesso.
 
-## 9. Módulos previstos
+## 14. Integração e interoperabilidade
 
-Visão futura, não implementada: Tabagismo; Farmácia; Vacinas; Agenda; Visita Domiciliar; Odontologia; Saúde Mental; Teleassistência; Especialistas; Doenças crônicas; Saúde da mulher; Saúde infantil; Saúde do idoso; Educação em Saúde; Gestão; outros módulos aprovados pelo CTO.
+O Universal Integration Platform (UIP) deve suportar:
+- APIs, OAuth, webhooks e credenciais rotacionáveis;
+- bancos externos com contas e permissões mínimas, somente leitura quando possível;
+- arquivos CSV, XLSX, XML, JSON, OFX e documentos;
+- agente local para redes e sistemas locais;
+- padrões de saúde, incluindo HL7 FHIR R4 e RNDS quando aplicáveis e homologados;
+- conectores específicos e importação assistida.
 
-## 10. Sentinela
+Integração não implica equivalência semântica. Cada dado deve manter origem, identificador externo, momento de origem/ingestão, transformação, versão do mapeamento, autoria, qualidade e estado de sincronização. Conflitos devem ser reconciliados segundo políticas explícitas, nunca por sobrescrita silenciosa.
 
-Camada transversal capaz de observar eventos e indicadores e gerar alertas operacionais/inteligentes. Exemplos conceituais: estoque crítico, medicamento próximo do vencimento, demanda reprimida, ausência recorrente, encaminhamento parado, acompanhamento atrasado, oportunidade de vacinação e indicadores anômalos.
+## 15. Governança clínica e segurança
 
-## 11. Clinical Intelligence
+Tysvora organiza e transmite trabalho; não diagnostica nem prescreve autonomamente. Decisões clínicas permanecem com profissional habilitado, dentro do escopo legal e institucional.
 
-Separação conceitual entre:
-- Evidence Engine;
-- Calculation Engine;
-- Protocol Engine;
-- Safety Engine;
-- AI Engine.
+Prescrições e documentos precisam de autoria, integridade, assinatura válida quando exigida, versionamento, status, justificativa e histórico não destrutivo. A plataforma não deve apresentar PDF visualmente semelhante como prescrição válida sem atender requisitos legais.
 
-Esses componentes deverão apoiar profissionais de saúde e não substituir decisões profissionais.
+Acesso deve combinar RBAC, atributos/contexto, finalidade, vínculo, unidade, equipe, relação assistencial e necessidade. LGPD, sigilo profissional, normas setoriais e regras de retenção precisam ser avaliados por jurisdição e caso de uso.
 
-Componentes conceituais potencialmente reutilizáveis do Veritas-OS serão avaliados na FASE 7 por: **REUTILIZAR / ADAPTAR / DESCARTAR / RECONSTRUIR**. Não há migração nesta fase.
+## 16. Inteligência, Sentinela e IA
 
-## 12. AI Governance
+Sentinela observa sinais autorizados e identifica anomalias, atrasos, filas, risco operacional e oportunidades de ação. Deve explicar origem, regra, prioridade e destinatário; não transforma alertas em diagnóstico.
 
-- IA não deve ser autoridade clínica autônoma;
-- respostas precisam de contexto e governança adequados;
-- decisões críticas permanecem sob responsabilidade profissional;
-- modelos devem ser substituíveis;
-- evitar acoplamento a um único provedor;
-- custos e utilização devem ser observáveis.
+IA pode resumir, classificar, extrair, sugerir e apoiar tarefas aprovadas. Deve usar políticas, avaliação, proteção contra prompt injection, rastreabilidade, limites de dados, avaliação de vieses, fallback seguro e supervisão humana. Regras determinísticas, cálculos e protocolos permanecem separados.
 
-## 13. Segurança e privacidade
+## 17. Operações e capacidade
 
-Princípios: LGPD; least privilege; RBAC; segregação de tenants; auditoria; proteção de secrets; criptografia; observabilidade; rastreabilidade; minimização de dados.
+A plataforma deverá coordenar trabalho remoto, presencial e de campo. Otimização considera capacidade, competência, território, distância, agenda, carga, prioridade definida por profissional e restrições institucionais. A otimização financeira não pode sobrepor segurança ou adequação assistencial.
 
-## 14. Integrações
+Indicadores devem medir tempo para recuperar contexto, primeira resposta, fila, tarefas vencidas, comparecimento, visitas concluídas, continuidade, adesão autorrelatada, resultados e carga profissional. Benefícios econômicos só serão alegados após pilotos medidos.
 
-Conceito de **Integration Gateway** com adapters. Tecnologias e contratos específicos ficam para a arquitetura técnica.
+## 18. Modularidade e extensão
 
-## 15. Deployment Center
+Módulos entregam capacidades de domínio e declaram manifestos, versões, dependências, permissões, dados, APIs, eventos, configuração, saúde e ciclo de vida. Programas e protocolos são configurações/artefatos governados; não devem ser confundidos com pacotes de código.
 
-```
-Admin
-  ↓
-Deployment
-  ↓
-Organização/Município
-  ↓
-Versão
-  ↓
-Gerar pacote
-  ↓
-Homologação
-  ↓
-Deploy
-```
+Novas verticais devem ser habilitadas por composição de Core + adaptadores + configurações + módulos de domínio quando necessário. Não prometer que toda vertical será apenas configuração: extensões reais podem exigir desenvolvimento.
 
-Futuramente deverá produzir artefatos versionados e reproduzíveis. **Secrets nunca devem fazer parte de pacotes de deployment.**
+## 19. Operação, implantação e comercialização
 
-## 16. Evolução
+A plataforma deverá suportar onboarding progressivo, importação assistida, homologação, ambientes, release versionado, feature flags, configuração e observabilidade. O ideal é reduzir implantação, mas não prometer instalação universal em 15 minutos ou uma hora sem testes por fonte de dados.
 
-```
-Build
-→ Validate
-→ Release
-→ Contract
-→ Configure
-→ Activate
-→ Observe
-→ Improve
-```
+Secrets não entram em pacotes. Isolamento de dados e responsabilidade operacional devem ser explícitos. Contratos comerciais não substituem autorização técnica nem homologação.
 
-## 17. Governança documental
+## 20. Benchmark competitivo e posicionamento
 
-```
-BLUEPRINT
-   ↓
-ROADMAP
-   ↓
-EXECUÇÕES
-   ↓
-CÓDIGO
-```
+O mercado inclui plataformas de gestão populacional, prontuários, home care, coordenação de cuidado, comunicação paciente-UBS e interoperabilidade. Não afirmar ausência de concorrentes ou exclusividade sem demonstrações comparáveis.
 
-**BLUEPRINT** define visão, princípios e arquitetura conceitual.  
-**ROADMAP** define sequência de execução.  
-**EXECUÇÃO** é a instrução específica do CTO.  
-**CÓDIGO** é a implementação concreta.
+Hipóteses de diferenciação a validar:
+- camada horizontal e independente de fornecedor;
+- vínculo de relato do paciente ao plano, encontro ou ordem exata;
+- ciclo completo da manifestação à ação e ao resultado;
+- programas configuráveis e combináveis;
+- um app com relacionamentos institucionais segregados;
+- workspace contextual multi-origem;
+- coordenação integrada de campo e capacidade;
+- implantação e extensibilidade com custo inferior.
 
-Em conflito: 1. instrução atual do CTO; 2. Blueprint; 3. Roadmap; 4. implementação existente.
+## 21. Cenários de arquitetura obrigatórios
 
-## 18. Regra de ouro
+1. Nutrição: plano, dificuldade relatada, revisão profissional, nova versão e retorno.
+2. Medicina: relato de persistência de dor, avaliação pelo médico, decisão, prescrição válida e histórico de versões.
+3. UBS: recaída em programa, contexto consolidado, contato, visita domiciliar, execução e encerramento.
+4. Programas simultâneos: uma pessoa em diabetes, hipertensão e tabagismo com equipes e acessos segregados.
+5. Multi-instituição: paciente em clínica A e instituição B, com isolamento e compartilhamento autorizado.
+6. Veterinária: CareSubject animal, Guardian humano, clínica e jornada específica.
+7. Integração: divergência entre fonte externa e dado institucional, proveniência e reconciliação.
+8. Operação de campo: priorização profissional, competência, território, atribuição e evidência de conclusão.
 
-> Nenhuma decisão arquitetural importante deve ser tomada apenas porque é conveniente para uma implementação imediata se ela comprometer a evolução futura do Tysvora.
+## 22. Governança documental
 
-## 19. Decisões adiadas
+BLUEPRINT define o que o produto é e os princípios.  
+ROADMAP define a ordem e os gates.  
+Especificações definem contratos verificáveis.  
+EXECUÇÕES autorizam escopo específico.  
+Código é a implementação.
 
-Não definir nesta fase: framework, banco, infraestrutura, deploy, autenticação, provedor de IA, isolamento físico de tenancy, APIs, CI/CD, containers ou implementação de módulos.
+Documentos devem distinguir: implementado e evidenciado; em desenvolvimento; especificado; planejado; decisão pendente. Preservar histórico e IDs de fases/execuções.
+
+## 23. Regra de ouro
+
+Nenhuma otimização local pode comprometer a capacidade universal, a segurança, a interoperabilidade ou a evolução sustentável do Tysvora.
+
+## 24. Decisões ainda abertas
+
+Não presumir decisões definitivas sobre: stack futura além do que já está documentado, topologia de serviços, broker, FHIR/RNDS por integração, mecanismo de assinatura, identidade externa, armazenamento documental, analytics, RPO/RTO, operação offline, implantação municipal, modelo comercial e certificações. Cada decisão exige ADR, evidência e aprovação.

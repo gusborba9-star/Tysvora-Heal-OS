@@ -1,75 +1,45 @@
-# Tysvora Heal OS — Security Architecture
+# Tysvora Heal OS — Security & Privacy Architecture
 
-## 1. Security model
+## 1. Modelo
 
-Security is defense in depth across identity, authorization, tenancy, data, application, infrastructure and observability.
+Defense in depth: identidade, autenticação, autorização, tenant isolation, contexto, dados, aplicação, infraestrutura, observabilidade e resposta a incidentes.
 
-## 2. Roles
+## 2. Identidade e representação
 
-- **Platform Admin:** Tysvora-level platform governance; not automatically entitled to tenant clinical content.
-- **Tenant Admin:** administrative control within its tenant.
-- **Municipal Management:** management capabilities explicitly granted within applicable public-health tenant scope.
-- **Unit Management:** unit-level management permissions.
-- **Professional:** professional capabilities explicitly granted by role/context.
-- **Patient/User:** subject-facing capabilities explicitly granted.
-- **Technical Operator:** operational/infrastructure capabilities; technical access does not imply clinical-content access.
+UserIdentity autentica; Person representa pessoa; Professional representa contexto profissional; CareSubject recebe cuidado; Guardian representa sujeito quando autorizado. Uma identidade pode ter múltiplos vínculos sem fundi-los.
 
-"Admin" is never a universal permission.
+## 3. Autorização contextual
 
-## 3. Authentication
+Combinar RBAC com atributos/contexto (ABAC): tenant, organization, unit, team, relação de cuidado, programa, finalidade, papel profissional, vínculo, estado do consentimento/base legal e sensibilidade do dado. Default deny. Acesso emergencial break-glass é justificado, limitado no tempo e auditado.
 
-Authentication is a dedicated security boundary. The implementation must support secure identity lifecycle, session management, MFA where required, credential recovery and revocation according to risk.
+## 4. Escopos
 
-The definitive identity provider is **DECISION PENDING** for implementation planning.
+Platform admin não recebe conteúdo clínico por padrão. Tenant admin não é automaticamente profissional. Participação em programa não concede acesso completo ao prontuário. Guardian tem escopo delegado e revogável. Operador técnico não recebe conteúdo assistencial por padrão.
 
-## 4. Authorization
+## 5. Multi-instituição
 
-Authorization combines tenant context, RBAC, permissions and contextual rules. Least privilege is mandatory.
+Uma pessoa vinculada a instituições distintas mantém contextos segregados. Compartilhamento requer base legal, finalidade e autorização adequadas, além de trilha. Não inferir consentimento por convite ou login.
 
-Roles grant permissions; they do not bypass tenant boundaries.
+## 6. Autenticação e sessão
 
-## 5. Tenant isolation
+Autenticação segura, MFA conforme risco, recuperação, revogação, gestão de dispositivos e sessão, proteção contra CSRF/XSS, rate limiting e detecção de abuso. Provedor final permanece ADR.
 
-Tenant context must be established, propagated and validated on protected operations. Database-level RLS is a required defense-in-depth control with PostgreSQL/Supabase.
+## 7. Dados e documentos
 
-Application checks alone are insufficient for high-value tenant isolation.
+Criptografia em trânsito/repouso, gestão de chaves, minimização, classificação, retenção, exportação e descarte. Documentos clínicos precisam de integridade, assinatura e verificação conforme exigência legal.
 
-## 6. Audit
+## 8. Auditoria
 
-Security-relevant and governed business/clinical actions require auditable records with actor, tenant, action, target, timestamp and correlation context as appropriate.
+Acesso e mutações sensíveis registram actor, subject, tenant, organization, purpose, action, target, timestamp, correlation, source e resultado. Proteger contra alteração e acesso indevido. Logs técnicos não substituem audit trail.
 
-Audit data must be protected against unauthorized alteration.
+## 9. Integrações e IA
 
-## 7. Secrets
+Credenciais por conexão, least privilege, rotação, isolamento, allowlists, validação de payload e proteção contra replay. Dados enviados a IA passam por policy gate, minimização, controle de fornecedor/retention e avaliação de risco.
 
-Secrets must be stored in dedicated secret-management mechanisms. They must never be committed to Git or included in deployment packages.
+## 10. LGPD e governança
 
-## 8. Encryption
+Finalidade, adequação, necessidade, transparência, segurança, prevenção e direitos do titular devem orientar o desenho. Consentimento não é única base legal e não deve ser presumido. Exigir avaliação jurídica/encarregado para tratamentos de maior risco e dados de saúde.
 
-Encryption in transit and at rest is required according to platform capabilities and applicable risk. Key-management details remain an implementation decision.
+## 11. Testes
 
-## 9. API security
-
-Protected APIs require authentication/authorization, validation, rate limiting where appropriate, abuse controls, correlation IDs and secure error handling.
-
-## 10. Session security
-
-Sessions require expiration/revocation controls, secure cookie/token handling where applicable, CSRF protections appropriate to the interaction model and detection of anomalous access.
-
-## 11. Input and output
-
-Validate untrusted input at boundaries. Avoid leaking sensitive data through errors, logs or observability payloads.
-
-## 12. Threat modeling and testing
-
-Security threat modeling is required for high-risk capabilities. Security testing should include dependency review, authorization tests, tenant-isolation tests, API abuse tests and appropriate dynamic/static analysis.
-
-## 13. LGPD principles
-
-The architecture should apply purpose limitation, necessity/data minimization, security, transparency and controlled access consistent with LGPD obligations. Legal interpretation remains outside this technical document.
-
-## 14. Technical access boundary
-
-Infrastructure operators may operate systems without being granted clinical-content access by default. Operational break-glass access, when required, must be explicit, time-bounded, justified and audited.
-
-**DECISION PENDING:** definitive authentication provider and MFA strategy.
+Tenant isolation, organization/unit boundaries, program scope, guardian scope, revoked access, break-glass, export, API abuse, secrets, audit integrity, prompt injection e leakage.

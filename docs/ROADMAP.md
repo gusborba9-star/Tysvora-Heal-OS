@@ -1,177 +1,116 @@
-# Tysvora Heal OS — Roadmap
+# Tysvora Heal OS — Roadmap 2.0
 
-**Status:** Roadmap macro inicial.
+**Status:** reorganização macro proposta; fases históricas preservadas.  
+**Regra:** fase descrita não significa implementação ou autorização automática.
 
-Cada fase depende de validação da anterior; sua presença não significa implementação.
+## Governança de status
+
+Usar apenas: NÃO INICIADA, EM EXECUÇÃO, EM AUDITORIA, BLOQUEADA, CONCLUÍDA/APROVADA. Cada conclusão exige commit, CI/testes pertinentes, evidência, escopo e aceite formal do CTO.
 
 ## FASE 0 — GOVERNANÇA
-**Objetivo:** estabelecer autoridade documental, regras de execução, versionamento e decisão.  
-**Entregáveis:** governança; hierarquia documental; regras de alteração e validação.  
-**Dependências:** nenhuma.  
-**Conclusão:** governança aprovada e adotada.
+Objetivo: autoridade documental, decisões, versionamento e execução controlada.  
+Conclusão: hierarquia documental e gates aprovados.
 
 ## FASE 1 — FUNDAÇÃO
-**STATUS: CONCLUÍDA**  
-**EXECUÇÃO:** 01  
-**COMMIT:** `b252464cd31f3d40d45f1328af8615b714b0c883`  
-**VALIDAÇÃO:** APROVADA PELO CTO
-
-**Objetivo:** estabelecer a base documental controlada.  
-**Entregáveis:** README, Blueprint, Roadmap, visão, princípios e fases.  
-**Dependências:** FASE 0.  
-**Conclusão:** documentação revisada e consistente, sem produto.
+**STATUS: CONCLUÍDA** conforme registro histórico.  
+Preservar commit e aceite existentes. A conclusão documental original não representa produto completo.
 
 ## FASE 2 — ARQUITETURA TÉCNICA
-**STATUS: CONCLUÍDA**  
-**EXECUÇÃO:** 02  
-**COMMIT:** `7751ae9cbafd2dc6b42a329f061aeab07c25be6d`  
-**VALIDAÇÃO:** APROVADA PELO CTO
+**STATUS: CONCLUÍDA** conforme registro histórico.  
+A arquitetura técnica existente permanece como base; documentos são atualizados sem apagar histórico de aprovação. A nova visão exige revisão de arquitetura antes de implementação de novas capacidades.
 
-**Objetivo:** transformar a arquitetura conceitual em decisões técnicas verificáveis.  
-**Entregáveis:** arquitetura técnica, stack, persistência, tenancy, contratos, segurança, eventos, módulos, IA, integrações, observabilidade e deployment.  
-**Dependências:** FASE 1.  
-**Conclusão:** arquitetura técnica documentada, auditada e aprovada pelo CTO.
+## FASE 2A — PRODUCT & ARCHITECTURE LOCK
+**STATUS: DOCUMENTAÇÃO EM REVISÃO**
+Objetivo: alinhar Blueprint, experiências, domínio universal, programas, jornadas, governança clínica, integração, dados e benchmark.
+Entregáveis:
+- Blueprint 2.0;
+- Roadmap 2.0;
+- Product Experience;
+- Domain Model 2.0;
+- Program Engine;
+- Care Continuity;
+- Universal Integration;
+- Data Provenance;
+- Clinical Governance;
+- Field Operations;
+- Capacity Optimization;
+- Competitive Benchmark;
+- ADRs e matriz de rastreabilidade.
+Gate: consistência documental, cenários E2E modelados, lacunas e decisões pendentes explícitas, aceite CTO. Nenhum código novo autorizado por esta fase.
 
 ## FASE 3 — HEAL CORE
-**STATUS: EM EXECUÇÃO**  
-**EXECUÇÕES:** 03, 03A, 04, 04B
+**STATUS HISTÓRICO: EM EXECUÇÃO**
+Preservar Execuções 03, 03A, 04, 04B e 05 e seus registros originais. A correção 04B e configuração 05 continuam aprovadas conforme evidências já registradas; não extrapolar esse aceite para todo o Core.
+Objetivo: concluir e validar capacidades transversais previstas, incluindo persistência, identidade, contexto, autorização, auditoria, eventos e contratos necessários.
+Gate adicional: validar o Core contra Person/UserIdentity/Professional/CareSubject/Guardian e relacionamentos multi-institucionais sem inserir regras clínicas no Core. Não alterar contratos já validados sem ADR e regressão.
 
-**Objetivo:** implementar capacidades transversais.  
-**Entregáveis:** Core, organizações, unidades, usuários, configuração, eventos, auditoria, workflows e notificações autorizados.  
-**Dependências:** FASE 2 aprovada.  
-**ESTADO:** a Fase 3 permanece em execução até que as demais capacidades previstas sejam implementadas e aprovadas formalmente pelo CTO. A aprovação da Execução 04B não encerra a Fase 3.
+## FASE 4 — PLATFORM & MODULE GOVERNANCE
+Objetivo: Module Registry, manifests, versões, dependências, contratos, feature flags, ciclo de vida e governança de configurações.
+Gate: módulos podem ser ativados/suspensos com auditoria; feature flags nunca substituem autorização.
 
-### Execução 03
-**STATUS:** NÃO APROVADA — EM CORREÇÃO  
-**COMMIT:** `081efd677d7451b3bea2fcf761ffede701fc0cea`  
-**RESULTADO:** estrutura inicial implementada; invariantes de tenancy identificadas pelo CTO como insuficientemente protegidas.
+## FASE 5 — IDENTITY, SECURITY & PRIVACY
+Objetivo: identidade, RBAC + ABAC/contexto, tenancy, multi-instituição, consentimentos/base legal, segregação, auditabilidade, LGPD e controles técnicos.
+Gate: testes negativos entre tenants, organizações, unidades, programas e relacionamentos; revogação e break-glass auditados.
 
-### Execução 03A
-**STATUS:** EM AUDITORIA  
-**OBJETIVO:** corrigir invariantes de tenancy e relacionamento entre entidades sem ampliar o escopo da FASE 3.
+## FASE 6 — UNIVERSAL ENGINES & INTEGRATION FOUNDATION
+Objetivo: contratos e capacidades compartilhadas de workflow, tarefas, notificações, documentos, busca, comunicação, integração e proveniência.
+Entregas incrementais: Integration Gateway/UIP, conectores API, arquivos, DB, agente local; ingestão, mapeamento, qualidade, sincronização e reconciliação.
+Gate: conector de referência ponta a ponta com origem, idempotência, falha, retry, reconciliação e auditoria.
 
-### Execução 04
-**STATUS:** CORRIGIDA PELA EXECUÇÃO 04B; NÃO TRATAR COMO APROVAÇÃO INDEPENDENTE  
-**COMMIT ORIGINAL:** `f71d668c845a1a5cbfb5c396ff752d0eeca6cc57`  
-**REGISTRO:** a implementação original foi objeto de correção de autorização na Execução 04B. A aprovação formal registrada para este conjunto refere-se à Execução 04B e ao commit indicado abaixo.  
-**INFRAESTRUTURA EXTERNA:** não conectada.
+## FASE 7 — DOMAIN, PROGRAM & CLINICAL GOVERNANCE
+Objetivo: modelo universal de domínio, Program Engine, CarePathway, protocolos, instrumentos, ordens/documentos e limites profissionais.
+Gate: cinco cenários mínimos — tabagismo UBS, diabetes rede, depressão clínica, nutrição individual e veterinária — modelados sem duplicar Core. Homologação clínica/legal separada de testes técnicos.
 
-### Execução 04B — Correção de autorização
-**STATUS:** APROVADA FORMALMENTE PELO CTO  
-**COMMIT APROVADO:** `9153602f6fd3d4defe3a639b34bd5e2c7f9c27d7`  
-**PARENT:** `f71d668c845a1a5cbfb5c396ff752d0eeca6cc57`  
-**OBJETIVO:** impedir que contextos de tenant atribuam papéis de escopo platform e exigir autorização explícita `role.assign.platform`, além da autorização genérica.  
-**VALIDAÇÃO CI:** CONCLUÍDA COM SUCESSO  
-**SHA EXECUTADO NO CI:** `c1953c8372ebbe517f5aa52b789595cbe956e29c`  
-**GITHUB ACTIONS RUN #2:** https://github.com/gusborba9-star/Tysvora-Heal-OS/actions/runs/37858811970  
-**EVIDÊNCIA:** o job `build-and-test` terminou com `completed / success`; `npm test` executou o build TypeScript e os testes de aplicação, autorização de papéis e Core.  
-**INFRAESTRUTURA EXTERNA:** nenhuma conectada.
+## FASE 8 — SENTINELA & OPERATIONAL INTELLIGENCE
+Objetivo: sinais, regras, alertas, escalonamento, filas, atrasos, anomalias e explicabilidade.
+Gate: alertas com fonte, regra, prioridade, destinatário, falso positivo monitorado e ação humana. Não emitir diagnóstico autônomo.
 
-### Execução 05 — Core Configuration
-**STATUS: APROVADA FORMALMENTE PELO CTO**  
-**ESCOPO APROVADO:** configuração nos níveis tenant, organization, unit e module, com rejeição explícita de platform nesta execução.  
-**COMMIT DE IMPLEMENTAÇÃO DA CORREÇÃO FINAL:** `2254ec1a7f4859ff636bb47385c68412834494e2`  
-**COMMIT DOS TESTES DE REGRESSÃO / SHA FINAL VALIDADO:** `eadbf89fff0ebe22f3797bbf0191f15f7be002f1`  
-**VALIDAÇÃO CI:** CONCLUÍDA COM SUCESSO — `completed / success`  
-**GITHUB ACTIONS:** https://github.com/gusborba9-star/Tysvora-Heal-OS/actions/runs/37864216324  
-**EVIDÊNCIA:** o job `build-and-test` e as etapas de instalação de dependências, build TypeScript e suíte completa de testes terminaram com sucesso no workflow indicado.  
-**REGISTRO DOCUMENTAL NA BRANCH DE VALIDAÇÃO:** `eeb57e7ca2e689254821d3870c6bb9344d79bf8b` — https://github.com/gusborba9-star/Tysvora-Heal-OS/commit/eeb57e7ca2e689254821d3870c6bb9344d79bf8b  
-**PRESERVAÇÃO:** histórico anterior preservado; Blueprint e código não alterados por este registro documental; nenhuma infraestrutura externa conectada.  
-**FASE 3:** permanece **EM EXECUÇÃO** até que todas as capacidades previstas sejam implementadas e aprovadas formalmente. A aprovação da Execução 05 não encerra a Fase 3.
+## FASE 9 — CARE EXPERIENCE & FIRST VERTICAL/PROGRAM
+Objetivo: Institution, Patient e Field experiences; Unified Care Workspace; primeira jornada vertical/programa.
+Gate: jornada completa da entrada ao acompanhamento, decisão profissional, tarefa, retorno e auditoria; usabilidade e acessibilidade validadas.
 
-## FASE 4 — MODULE REGISTRY
-**STATUS: NÃO INICIADA**
+## FASE 10 — INTEROPERABILITY DELIVERY
+Objetivo: conectores homologados, mapeamentos, FHIR/RNDS quando aplicáveis, monitoramento e operação de sincronização.
+Gate: homologação por sistema e fonte. Nunca declarar interoperabilidade universal por suportar um padrão apenas.
 
-**Objetivo:** governar registro, disponibilidade, dependências e estado dos módulos.  
-**Dependências:** FASE 3.  
-**Conclusão:** módulos governados de forma controlada e auditável.
+## FASE 11 — GOVERNED AI GATEWAY
+Objetivo: abstração de provedores, roteamento, políticas, avaliações, custo, segurança, supervisão e auditabilidade.
+Gate: avaliação por caso de uso, limites de dado, validação de saída, fallback seguro e aprovação humana para uso sensível.
 
-## FASE 5 — IDENTITY / SECURITY / LGPD
-**STATUS: NÃO INICIADA**
+## FASE 12 — ANALYTICS & CAPACITY OPTIMIZATION
+Objetivo: indicadores de programa, jornada, equipe, unidade e rede; filas, capacidade, remoto/presencial, campo, custos e resultados.
+Gate: definições de métricas, qualidade e lineage, privacidade e validação de utilidade. Alegações de economia exigem piloto medido.
 
-**Objetivo:** consolidar identidade, autorização, segurança e privacidade.  
-**Dependências:** FASES 2–4.  
-**Conclusão:** controles validados nos cenários autorizados.
+## FASE 13 — DEPLOYMENT & OPERATIONS CENTER
+Objetivo: releases reproduzíveis, ambientes, configuração, secrets, observabilidade, backup, recuperação, suporte e atualização.
+Gate: RPO/RTO, restore testado, monitoramento, rollback, gestão de incidentes e runbooks.
 
-## FASE 6 — ENGINES REUTILIZÁVEIS
-**STATUS: NÃO INICIADA**
+## FASE 14 — END-TO-END HOMOLOGATION
+Objetivo: homologar cenários integrados, segurança, clínica, acessibilidade, operação, performance e integração.
+Gate: matriz de cenários, evidências, riscos residuais e aceite formal.
 
-**Objetivo:** criar capacidades reutilizáveis entre módulos.  
-**Dependências:** FASES 2–5.  
-**Conclusão:** capacidades reutilizáveis validadas.
+## FASE 15 — PRODUCTION
+Objetivo: liberar escopo homologado com operação controlada.
+Gate: readiness review, suporte, monitoramento, continuidade, privacidade, contrato e rollback aprovados.
 
-## FASE 7 — CLINICAL INTELLIGENCE
-**STATUS: NÃO INICIADA**
+## FASE 16 — EXPANSION
+Objetivo: adicionar verticais, especialidades, programas, integrações e regiões sem regressão de Core.
+Gate: teste de extensibilidade, impacto, custo de manutenção, segurança e aprovação de release.
 
-**Objetivo:** implementar apoio à decisão profissional sob governança.  
-**Dependências:** FASES 3, 5 e 6.  
-**Conclusão:** camada validada como apoio, sem autoridade clínica autônoma.
+## Critérios transversais de conclusão
 
-## FASE 8 — SENTINELA
-**STATUS: NÃO INICIADA**
+Toda execução deve declarar:
+1. escopo e exclusões;
+2. documentos/contratos afetados;
+3. dependências e ADRs;
+4. mudanças de dados e migração/rollback;
+5. autorização e isolamento;
+6. testes positivos, negativos e regressão;
+7. observabilidade e falhas;
+8. evidências com commit/CI;
+9. riscos residuais;
+10. aceite formal.
 
-**Objetivo:** observação, detecção e alertas.  
-**Dependências:** FASES 3, 5, 6 e, quando aplicável, 7.  
-**Conclusão:** Sentinela validada e observável.
+## Regra de preservação
 
-## FASE 9 — PRIMEIRO MÓDULO VERTICAL
-**STATUS: NÃO INICIADA**
-
-**Objetivo:** validar o primeiro módulo sobre o Core.  
-**Dependências:** FASES 3–8 conforme o módulo.  
-**Conclusão:** módulo validado sem duplicação do Core.
-
-## FASE 10 — INTEGRAÇÕES
-**STATUS: NÃO INICIADA**
-
-**Objetivo:** estabelecer integrações externas por Integration Gateway e adapters.  
-**Dependências:** FASES 2–5 e primeiro módulo.  
-**Conclusão:** integrações homologadas.
-
-## FASE 11 — AI GATEWAY
-**STATUS: NÃO INICIADA**
-
-**Objetivo:** camada governada e substituível para IA.  
-**Dependências:** FASES 2, 5, 6 e 7.  
-**Conclusão:** IA acessível sem acoplamento estrutural a um único provedor.
-
-## FASE 12 — ANALYTICS / GESTÃO
-**STATUS: NÃO INICIADA**
-
-**Objetivo:** análise e gestão sobre dados e eventos autorizados.  
-**Dependências:** Core, segurança, engines, integrações e módulos.  
-**Conclusão:** capacidades validadas.
-
-## FASE 13 — DEPLOYMENT CENTER
-**STATUS: NÃO INICIADA**
-
-**Objetivo:** distribuição e implantação versionada e reproduzível.  
-**Dependências:** FASES 2–5 e maturidade operacional.  
-**Conclusão:** versão autorizada preparada para implantação sem secrets nos artefatos.
-
-## FASE 14 — HOMOLOGAÇÃO
-**STATUS: NÃO INICIADA**
-
-**Objetivo:** validar ambientes e cenários de aceitação.  
-**Dependências:** escopo de produto e infraestrutura necessário.  
-**Conclusão:** aprovação formal para produção.
-
-## FASE 15 — PRODUÇÃO
-**STATUS: NÃO INICIADA**
-
-**Objetivo:** disponibilizar versão autorizada em produção.  
-**Dependências:** FASE 14.  
-**Conclusão:** operação estável dentro dos critérios definidos.
-
-## FASE 16 — EXPANSÃO
-**STATUS: NÃO INICIADA**
-
-**Objetivo:** ampliar módulos, integrações, organizações e capacidades preservando arquitetura e governança.  
-**Dependências:** produção estável e autorização de evolução.  
-**Conclusão:** cada expansão possui escopo, validação, versionamento e governança próprios.
-
-## Governança do roadmap
-
-O roadmap é macro e não autoriza sozinho uma implementação. Cada avanço exige execução explícita do CTO, respeitando Blueprint, fase e dependências.
-
-A FASE 3 permanece **EM EXECUÇÃO** até que as capacidades previstas sejam implementadas e aprovadas formalmente. Nenhuma fase posterior é autorizada por este documento.
+Fases e execuções históricas não serão renumeradas nem reclassificadas retroativamente. O novo roadmap reorganiza trabalho futuro e adiciona gates. Nenhuma fase posterior fica autorizada automaticamente.

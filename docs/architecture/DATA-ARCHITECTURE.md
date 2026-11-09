@@ -1,75 +1,37 @@
 # Tysvora Heal OS — Data Architecture
 
-## 1. Primary data platform
+## 1. Plataforma e organização
 
-**PostgreSQL** is the primary transactional database.
+PostgreSQL é a base transacional preferencial; Supabase é a plataforma gerenciada inicialmente documentada, sem eliminar portabilidade. Organização por bounded context/schemas com ownership explícito. Não criar tabela antes de contrato, autorização, retenção e migração definidos.
 
-Reasons: transactional consistency, relational modeling, mature indexing, strong authorization primitives and suitability for multi-tenant healthcare workloads.
+## 2. Classes de dados
 
-**Supabase** is the initial managed PostgreSQL platform choice. PostgreSQL remains the portability anchor.
+Core/identidade; organizacional; assistencial/clinical; programa/jornada; operacional; documentos; integração/proveniência; auditoria; analítico; telemetria. Dados sensíveis não são replicados para analytics sem finalidade, minimização e política de acesso.
 
-## 2. Logical organization
+## 3. Tenancy e isolamento
 
-Initial strategy: **domain-oriented PostgreSQL schemas**, with explicit separation between Core and module-owned domains.
+Tenant context em todo dado tenant-owned. Organization, Unit, Team, CareRelationship e ProgramEnrollment são dimensões adicionais de escopo, não substitutos de tenant. RLS é defesa obrigatória quando PostgreSQL/Supabase. Testes negativos devem cobrir acesso cruzado.
 
-Conceptually:
+## 4. Proveniência e lineage
 
-```
-core.*
-module_<name>.*
-```
+Dados integrados preservam source system, external identifier, source timestamp, ingestion timestamp, actor/source identity, extraction method, mapping/transform version, validation status, confidence/quality, sync cursor and conflict state. Ver especificação DATA-PROVENANCE.
 
-This is preferred over placing every domain in one shared schema because it makes ownership, migration boundaries, permissions and dependency review more explicit while retaining one transactional database.
+## 5. Reconciliação
 
-The exact schema names and SQL objects are implementation decisions.
+Não assumir que última escrita vence. Definir autoridade por atributo e domínio, frescor, confiabilidade, autoria e regra institucional. Conflitos geram estado explícito e fila de reconciliação; nenhuma sobrescrita silenciosa de informação clínica.
 
-## 3. Tenancy
+## 6. Versionamento e temporalidade
 
-Tenant context must be present for tenant-owned data. Isolation is enforced at application authorization and database authorization layers. RLS is required defense in depth when PostgreSQL/Supabase is used.
+Distinguir tempo do evento, tempo de registro, tempo de ingestão e vigência. Preservar versões de programas, protocolos, planos e documentos. Correções são novos registros/eventos com referência ao anterior.
 
-No module may create data structures that violate global tenancy, audit or security rules of the Core.
+## 7. Persistência, migrações e retenção
 
-## 4. Data classes
+Migrations versionadas, reproduzíveis, revisáveis e reversíveis quando possível. Retenção, descarte, anonimização e bloqueio legal por classe e jurisdição. Documentos binários em object storage protegido; metadados e ACL no banco.
 
-- **Core data:** identity, tenancy, organizations, configuration, module lifecycle.
-- **Clinical data:** patient/subject and clinical-domain information.
-- **Operational data:** inventory, scheduling, workflows and operational states.
-- **Audit data:** security and business traceability.
-- **Analytical data:** derived indicators and analytical structures.
-- **Documents/files:** metadata in the database and binary content in an appropriate storage layer.
+## 8. Backup, recuperação e analytics
 
-Clinical and sensitive data must not be replicated into analytics without an explicit governance purpose and access policy.
+Backups e restore tests obrigatórios; RPO/RTO por ADR. Analytics desacoplado do workload transacional quando volume justificar. Métricas com definição, lineage, qualidade e janela temporal explícitas.
 
-## 5. Migrations
+## 9. Decisões pendentes
 
-Database migrations must be versioned, reviewable and reproducible. Module migrations must respect Core contracts and tenant isolation.
-
-No production tables are created in this execution.
-
-## 6. Retention and lifecycle
-
-Retention must be policy-driven by data class, legal/regulatory requirements and contractual context. Deletion, archival and anonymization must be designed per class rather than through a universal rule.
-
-## 7. Backups and recovery
-
-Backups, point-in-time recovery where supported, restore testing and disaster-recovery procedures are mandatory operational concerns before production.
-
-**DECISION PENDING:** exact RPO/RTO targets and backup provider/topology.
-
-## 8. Indexing and partitioning
-
-Indexes must be driven by validated query patterns and tenant-aware access paths.
-
-**DECISION PENDING:** partitioning strategy. It should be introduced only when measured volume, retention or query behavior justifies it.
-
-## 9. Documents and files
-
-Database records should contain metadata and authorization references; binary storage should be separated from transactional relational data.
-
-**DECISION PENDING:** definitive object-storage implementation.
-
-## 10. Analytics
-
-Analytical workloads should not compromise transactional workloads.
-
-**DECISION PENDING:** definitive analytics architecture/engine and whether/when a separate analytical store is justified.
+Object storage, particionamento, warehouse, search, estratégia de CDC, retenção detalhada e RPO/RTO.

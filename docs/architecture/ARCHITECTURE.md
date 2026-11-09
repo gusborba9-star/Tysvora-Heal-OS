@@ -1,213 +1,75 @@
-# Tysvora Heal OS — Technical Architecture
+# Tysvora Heal OS — Architecture
 
-**Status:** Architecture specification for CTO review.  
-**Execution:** 02 — Technical Architecture.
+**Status:** especificação arquitetural; decisões pendentes identificadas. Não é evidência de implementação.
 
-## 1. Architectural principle
+## 1. Princípio
 
-```
-TYSVORA HEAL OS
-        │
-        ▼
-     HEAL CORE
-        │
- ┌──────┼────────┬──────────┐
- ▼      ▼        ▼          ▼
-Modules Engines Intelligence Integrations
-        │
-        ▼
- Infrastructure
-```
+Uma plataforma lógica única, composta por capacidades compartilhadas, domínios delimitados e experiências específicas. Módulos não duplicam Core. Motores são fronteiras de responsabilidade, não uma decisão antecipada por microserviços.
 
-Modules consume shared Core capabilities. They must not duplicate identity, users, audit, events, notifications, configuration or tenancy.
+## 2. Camadas
 
-## 2. Monorepo
+1. Universal Core: tenancy, identidade, organização, unidades, profissionais, relações, autorização, configuração, auditoria e eventos.
+2. Universal Data & Integration: conectores, ingestão, normalização, qualidade, proveniência, reconciliação e sincronização.
+3. Domain Adaptation: vertical, especialidade, programa, linha de cuidado, protocolo, terminologia e extensões.
+4. Care/Service Operations: jornadas, planos, intake, workflow, tarefas, comunicação, acompanhamento, campo e coordenação.
+5. Intelligence: Sentinela, analytics, capacity optimization e IA governada.
+6. Experience/Delivery: Institution, Patient, Field, APIs, administração, release e operação.
 
-The system is architected as one logical monorepo. A conceptual structure is:
+Segurança, observabilidade, governança e auditabilidade são transversais.
+
+## 3. Estrutura lógica
 
 ```
-apps/         deployable applications and interfaces
-packages/     reusable technical/domain packages
-modules/      vertical module boundaries
-services/     independently deployable/supporting services when justified
-infra/        infrastructure definitions and operational configuration
-docs/         architectural and governance documentation
+apps/          Institution, Patient, Field, admin
+packages/      Core, domain contracts, shared engines
+modules/       bounded domain capabilities
+connectors/    adapters and integration contracts
+services/      independently deployed components when justified
+infra/         runtime and operational configuration
+docs/          governance and specifications
 ```
 
-This is a logical target, not an implementation requirement in this execution. A monorepo tool is not selected yet; the repository and workspace strategy should be chosen during implementation planning based on build isolation, dependency management and deployment needs.
+É uma organização lógica proposta, não obrigação imediata de refatoração. Monorepo e deploy topology devem ser avaliados com base em build isolation, blast radius, custo e escala.
 
-## 3. Technology stack
+## 4. Stack e portabilidade
 
-### TypeScript
-**Role:** primary application/domain language.  
-**Why:** strong typing, broad ecosystem and consistency across server/client boundaries.  
-**Risk:** runtime correctness still requires tests and validation.  
-**Alternative:** another strongly typed backend language.  
-**Lock-in:** low at domain-contract level if domain logic remains framework-independent.
+A documentação anterior registra TypeScript, React, Next.js, PostgreSQL, Supabase, Vercel, OpenRouter e GitHub como escolhas/avaliações técnicas. Manter domínio independente de framework e fornecedor. PostgreSQL permanece âncora relacional; Supabase/Vercel são plataformas operacionais substituíveis. OpenRouter é opcional e acessado apenas via AI Gateway.
 
-### React
-**Role:** presentation layer.  
-**Why:** mature component model and ecosystem.  
-**Risk:** UI coupling if business rules are placed in components.  
-**Alternative:** another component UI framework.  
-**Lock-in:** limited if presentation contracts remain separate from domain/application logic.
+## 5. Heal Core — responsabilidades
 
-### Next.js
-**Role:** primary web application framework.  
-**Why:** React integration, server capabilities, routing and suitability for a unified platform.  
-**Risk:** framework-specific coupling.  
-**Alternative:** another TypeScript web framework or separate frontend/backend architecture.  
-**Lock-in:** moderate at presentation/application edges; domain packages must remain framework-independent.
+Identity, tenancy, organizations, units, users, professional identity/context, access control, configuration, audit, event contracts, notification orchestration, workflow primitives, document metadata, integration registry, observability contracts e module governance.
 
-### PostgreSQL
-**Role:** primary relational database.  
-**Why:** transactional integrity, mature SQL, strong isolation primitives and suitability for multi-tenant relational healthcare data.  
-**Risk:** operational complexity at scale.  
-**Alternative:** another relational database.  
-**Lock-in:** moderate at persistence layer; repositories/domain contracts should prevent unnecessary coupling.
+Core não deve incorporar protocolos clínicos, regras de especialidade ou fluxos específicos de programa. CareSubject pode ser referenciado pelo Core para identidade/relacionamento, mantendo semântica clínica em bounded contexts.
 
-### Supabase
-**Role:** managed PostgreSQL-centric platform and supporting backend capabilities.  
-**Why:** accelerates delivery while retaining PostgreSQL as the core data model.  
-**Risk:** provider-specific operational features can create coupling.  
-**Alternative:** self-managed PostgreSQL or another managed PostgreSQL provider.  
-**Lock-in:** moderate; PostgreSQL remains the portability anchor.
+## 6. Motores e fronteiras
 
-### Vercel
-**Role:** primary application deployment platform for the web application, subject to operational fit and future validation.  
-**Why:** strong Next.js integration and managed deployment workflow.  
-**Risk:** platform-specific deployment/runtime features.  
-**Alternative:** another cloud/container platform.  
-**Lock-in:** moderate; application must remain deployable independently of provider-specific APIs where practical.
+- Program Engine: templates, versões, elegibilidade, enrollment, etapas, metas, indicadores e encerramento.
+- Care Context: contexto longitudinal autorizado e fontes.
+- UIP: conectores e ciclo de dados.
+- Care Continuity: jornadas, planos, manifestações e reavaliações.
+- Workflow/Task: execução e atribuição.
+- Engagement: comunicação com usuário/paciente.
+- Field Operations: visitas e trabalho externo.
+- Clinical Governance: protocolos, instrumentos, ordens e documentos.
+- Sentinela/Analytics: detecção e mensuração.
+- AI Gateway: tarefas de IA governadas.
 
-### OpenRouter
-**Role:** optional AI provider/router accessed only through the Tysvora AI Gateway.  
-**Why:** provider/model breadth and routing flexibility.  
-**Risk:** external dependency and policy/availability changes.  
-**Alternative:** direct providers or another router.  
-**Lock-in:** intentionally low because OpenRouter is not part of the application domain contract.
+## 7. Experiências
 
-### GitHub
-**Role:** source control, review and project collaboration.  
-**Why:** mature Git-based workflow and repository governance.  
-**Risk:** workflow/platform dependency.  
-**Alternative:** another Git hosting platform.  
-**Lock-in:** low at source-code level.
+Institution, Patient e Field compartilham identidade e contratos, mas não privilégios. Um usuário pode acumular papéis diferentes. A troca de contexto institucional deve ser explícita e visível.
 
-No technology above is a domain authority. The architecture must preserve provider substitution at infrastructure boundaries.
+## 8. Multi-tenancy e multi-instituição
 
-## 4. Layers
+Tenant é fronteira de isolamento do cliente. Organization e Unit representam estrutura organizacional. Relações assistenciais e inscrições em programas definem acesso contextual; não concedem acesso global ao histórico. A mesma pessoa pode ter vínculos múltiplos, segregados por padrão.
 
-- **Presentation:** interfaces, rendering and interaction.
-- **Application:** use cases, orchestration, authorization checks and transaction boundaries.
-- **Domain:** domain rules and invariants independent of UI/frameworks.
-- **Infrastructure:** concrete runtime, persistence and platform mechanisms.
-- **Data:** repositories, persistence mappings, migrations and data lifecycle.
-- **Integration:** external-system adapters and contracts.
-- **AI:** governed AI Gateway and model/provider abstractions.
-- **Observability:** logs, metrics, traces, audit and health signals.
+## 9. Integrações
 
-Important business rules must not be coupled to the interface.
+Toda comunicação externa passa por adapters e contratos versionados. Domínio não chama diretamente fornecedor. UIP deve tratar autenticação, throttling, retries, idempotência, checkpoints, mapeamento, proveniência, dead-letter/reprocessamento e observabilidade.
 
-## 5. Heal Core
+## 10. Qualidades não funcionais
 
-The Core provides shared capabilities:
+Segurança, privacidade, disponibilidade, integridade, acessibilidade, desempenho, portabilidade, auditabilidade, recuperação, interoperabilidade, extensibilidade e custo operacional. Metas quantitativas serão ADRs por contexto e volume.
 
-| Component | Responsibility | Dependencies | Consumers | Boundary |
-|---|---|---|---|---|
-| Identity | identity lifecycle | security infrastructure | all authenticated flows | no clinical decisions |
-| Organizations | organizational hierarchy | tenancy | platform/modules | organization scope |
-| Tenancy | tenant context/isolation | data/security | all tenant data | tenant boundary |
-| Units | operational units | organizations | modules | organization scope |
-| Users | human accounts/subjects of access | identity | all modules | access identity |
-| Professionals | professional context | users/organizations | assistential modules | professional attributes |
-| Patients/Subjects | subject identity/context | tenant/organization | relevant clinical modules | no module-specific rules |
-| RBAC | roles/permissions | identity/tenancy | all protected operations | least privilege |
-| Audit | security/business traceability | identity/events | all governed components | immutable/auditable intent |
-| Events | domain/event publication | tenant context | modules/integrations | event contracts |
-| Notifications | notification orchestration | users/events | modules | delivery, not business truth |
-| Configuration | tenant/module settings | tenancy | modules | scoped configuration |
-| Feature Flags | controlled capability exposure | configuration | platform/modules | not authorization |
-| Module Registry | module lifecycle authority | tenancy/configuration | platform/modules | module governance |
-| Workflows | stateful process orchestration | events/configuration | modules | process, not UI |
-| Search | cross-domain retrieval abstraction | data/indexing | authorized consumers | authorization enforced |
-| Documents | document metadata/access abstraction | storage/security | modules | content access governed |
-| Observability | technical/business signals | runtime | operators/modules | no sensitive leakage |
-| Integrations | external adapters/gateway | integration contracts | modules/Core | no direct external coupling |
-| AI Gateway | governed model access | policy/audit | authorized consumers | no autonomous authority |
-| Analytics foundation | governed analytical signals | events/data | management/intelligence | controlled data exposure |
+## 11. Decisões pendentes
 
-## 6. Multi-tenancy
-
-Logical hierarchy:
-
-```
-Platform
-   │
-   ├── Tenant
-   │     ├── Organization
-   │     │      ├── Units
-   │     │      ├── Users
-   │     │      └── Modules
-   │     │
-   │     └── Configuration
-   │
-   └── Platform Administration
-```
-
-- **Platform:** Tysvora-level control plane.
-- **Tenant:** isolated customer/organizational boundary.
-- **Organization:** organizational entity inside a tenant.
-- **Unit:** operational subdivision.
-- **User:** identity that accesses the platform.
-- **Professional:** user with professional context/attributes.
-- **Patient/Subject:** health-related subject, where applicable.
-
-Tenant isolation must be enforced in application authorization and at the PostgreSQL data layer. When PostgreSQL/Supabase is used, Row Level Security (RLS) is a required defense-in-depth mechanism for tenant-scoped data. Exact policy design is implementation work.
-
-## 7. Integration architecture
-
-```
-Tysvora
-   ↓
-Integration Gateway
-   ↓
-Adapters
-   ├── Municipal systems
-   ├── External APIs
-   ├── Identity systems
-   ├── Health systems
-   └── Future integrations
-```
-
-Core domain code must not directly depend on external API implementations.
-
-## 8. Public and private health
-
-```
-Tysvora Heal OS
-│
-├── Public Health
-│   └── Municipal
-├── Private Health
-│   └── Clinics
-└── Networks
-```
-
-The Core is shared. Differences should arise through configuration, modules, permissions, workflows, integrations, contracts and policies rather than separate products.
-
-## 9. Observability
-
-The architecture distinguishes:
-
-- **Technical Observability:** logs, metrics, traces, health and errors.
-- **Security Audit:** access, privilege and security-relevant actions.
-- **Clinical/Business Audit:** governed traceability of business/clinical operations.
-
-All three require appropriate access control and data minimization.
-
-## 10. Decision pending
-
-**DECISION PENDING — High availability topology, definitive observability providers, search engine, document storage implementation, analytics engine, partitioning strategy, event broker and exact municipal deployment topology.**
-
-These remain open because they depend on workload, compliance, cost and operational evidence that should be established before committing the architecture.
+Topologia de serviços, broker, busca, armazenamento de documentos, analytics store, conectores prioritários, offline, HA, RPO/RTO, mecanismo de assinatura e deployment municipal. Resolver por ADR antes do uso produtivo.

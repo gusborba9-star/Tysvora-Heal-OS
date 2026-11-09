@@ -1,82 +1,37 @@
-# Tysvora Heal OS — AI Architecture
+# Tysvora Heal OS — Governed AI Architecture
 
-## 1. AI Gateway
+## 1. Papel
 
-```
-Tysvora
-   │
-   ▼
-AI Gateway
-   │
-   ├── Provider Adapter
-   ├── Model Router
-   ├── Policy Layer
-   ├── Cost Control
-   ├── Safety Layer
-   ├── Observability
-   └── Audit
-          │
-          ▼
-      Providers
-```
+AI Gateway é uma capacidade transversal opcional. Nenhum domínio depende diretamente de provedor/modelo. IA não é autoridade clínica, regulatória ou operacional autônoma.
 
-The application never depends directly on a model provider as a domain contract.
+## 2. Pipeline
 
-OpenRouter may be used as a provider/router through this boundary, but it is not structurally required.
+Use case → policy/pre-check → minimização/context assembly → provider/model routing → output schema validation → safety/post-check → human review when required → audit/metrics.
 
-## 2. Provider abstraction
+## 3. Separação
 
-Provider adapters translate a stable internal AI contract into provider-specific APIs. Providers and models must be replaceable.
+Deterministic Rules, Calculation Engine, Protocol Engine, workflow policies and AI são componentes distintos. Usar método determinístico quando suficiente. IA pode resumir, extrair, classificar ou sugerir dentro de escopo aprovado.
 
-## 3. Model routing
+## 4. Governança
 
-Routing may consider task policy, capability, latency, cost, availability and safety. A route must not silently change clinical meaning or safety posture.
+Catálogo de casos de uso e risco, modelos/provedores aprovados, prompt/version control, avaliação contínua, dataset governance, bias testing, red-team, drift monitoring, fallback seguro, limites de custo e revisão humana.
 
-## 4. Fallback
+## 5. Dados
 
-Fallbacks require explicit policy. A fallback model must be compatible with the task's minimum capability and safety constraints.
+Minimização e finalidade; não enviar prontuário inteiro por conveniência. Avaliar retenção do fornecedor, localização, subprocessadores, treinamento, criptografia e contrato. Cache isolado por tenant/subject e somente quando seguro.
 
-## 5. Reliability
+## 6. Segurança
 
-AI calls require bounded timeout and retry policies. Retries must respect idempotency and provider cost.
+Tratar documentos, mensagens e dados externos como conteúdo não confiável; resistir a prompt injection, data exfiltration e tool misuse. Ferramentas têm permissões mínimas e ações externas exigem confirmação/autoridade.
 
-## 6. Cost tracking
+## 7. Supervisão
 
-Track model/provider, request class, token/usage measures where available, latency and estimated cost. Tenant attribution must be supported for governed billing/observability.
+Prescrição, diagnóstico, mudança de tratamento, triagem clínica crítica e encerramento de risco não são executados autonomamente pela IA. Saída deve indicar incerteza, fonte e limites; profissional habilitado decide.
 
-## 7. Policy and safety
+## 8. Observabilidade
 
-Policy checks occur before and/or after model execution as appropriate. Sensitive clinical use cases require human oversight and explicit governance.
+Registrar caso de uso, versão, modelo, policy decision, latência, custo, validação, revisão humana e resultado sem reter conteúdo sensível desnecessariamente.
 
-## 8. Prompt and version management
+## 9. Avaliação
 
-Prompts/instructions used as system assets must be versioned, reviewable and attributable to a release.
-
-## 9. Structured outputs
-
-Where downstream logic depends on AI output, use schema-constrained/validated structured output where supported. Invalid or incomplete output must not bypass deterministic validation.
-
-## 10. Separation of concerns
-
-```
-Deterministic Rules
-Protocol Engine
-Calculation Engine
-AI
-```
-
-AI must not replace deterministic rules when a deterministic rule is appropriate.
-
-## 11. Audit and observability
-
-AIRequest/AIResponse metadata, policy decisions, model selection, usage and outcome status require appropriate auditability without indiscriminately storing sensitive prompts/responses.
-
-## 12. Caching
-
-Caching may be used where response reuse is safe. Patient-specific or sensitive outputs require strict cache isolation and policy review.
-
-## 13. Human oversight
-
-Critical decisions remain under professional responsibility. AI output is advisory and must not be treated as autonomous clinical authority.
-
-**DECISION PENDING:** exact provider set, model policy catalogue, retention of prompts/responses and final AI evaluation methodology.
+Métricas por tarefa: precisão, recall, calibração, taxa de abstenção, erro crítico, disparidade, custo e tempo. Bloquear release se limites de segurança não forem atendidos.
