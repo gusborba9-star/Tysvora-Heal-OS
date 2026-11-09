@@ -59,11 +59,11 @@ Gate: módulos podem ser ativados/suspensos com auditoria; compatibilidade, roll
 Objetivo: identidade, RBAC + ABAC/contexto, tenancy, multi-instituição, consentimentos/base legal, segregação, auditabilidade, LGPD e controles técnicos.
 Gate: testes negativos entre tenants, organizações, unidades, programas, CareSubject e Guardian; revogação, purpose limitation e break-glass auditados. É pré-requisito para dados reais em engines e conectores.
 
-## FASE 6 — UNIVERSAL ENGINES & INTEGRATION FOUNDATION
+## FASE 6 — UNIVERSAL ENGINES, UIP & EASY CONNECT FOUNDATION
 **Dependências:** contratos da Fase 3; controles mínimos da Fase 5; ADR-002, ADR-008 e ADR-017 para produção de eventos/conectores/comunicação.
-Objetivo: contratos e capacidades compartilhadas de workflow, tarefas, notificações, documentos, busca, comunicação, integração e proveniência.
-Entregas incrementais: Integration Gateway/UIP, conectores API, arquivos, DB, agente local; ingestão, mapeamento, qualidade, sincronização e reconciliação.
-Gate: conector de referência ponta a ponta com origem, idempotência, falha, retry, reconciliação e auditoria; testes negativos de isolamento e replay.
+Objetivo: contratos e capacidades compartilhadas de workflow, tarefas, notificações, documentos, busca, comunicação, UIP, proveniência e autoatendimento.
+Entregas incrementais: Control Plane/Data Plane; Connector SDK/Registry/manifests/contracts/capability negotiation/conformance; Easy Connect guiado; Universal Data Intake (upload, manual, CRM/ERP); API, Database, File/Document, Secure Transfer e padrões de saúde; Connector Agent com pareamento/assinatura/atualização/revogação; mappings, lineage, qualidade, identidade governada, sincronização e reconciliação.
+Gate: onboarding self-service testado; conector por família priorizada; importação com preview/quarentena/aprovação; agente com threat model e atualização segura; E2E com idempotência, falha, retry, replay, conflito, reconciliação, auditoria e isolamento. Nenhuma integração produtiva antes dos ADRs e gates aplicáveis.
 
 ## FASE 7 — DOMAIN, PROGRAM & CLINICAL GOVERNANCE
 **Dependências:** Fases 3 e 5; Fase 6 para dependências de workflow/eventos quando usadas; ADR-004, ADR-006, ADR-007, ADR-015 e ADR-018 conforme escopo.
@@ -74,10 +74,11 @@ Gate: cinco cenários mínimos — tabagismo UBS, diabetes rede, depressão clí
 Objetivo: sinais, regras, alertas, escalonamento, filas, atrasos, anomalias e explicabilidade.
 Gate: alertas com fonte, regra, prioridade, destinatário, falso positivo monitorado e ação humana. Não emitir diagnóstico autônomo.
 
-## FASE 9 — CARE EXPERIENCE & FIRST VERTICAL/PROGRAM
+## FASE 9 — CARE EXPERIENCES & FIRST VERTICAL/PROGRAM
 **Dependências:** Fases 3, 5, 6 e 7; contratos API e segurança aprovados.
-Objetivo: Institution, Patient e Field experiences; Unified Care Workspace; primeira jornada vertical/programa.
-Gate: jornada completa da entrada ao acompanhamento, decisão profissional, tarefa, retorno e auditoria; usabilidade e acessibilidade validadas.
+Objetivo: entregar Patient, Professional, Institution (Institutional Workspace Premium) e Field; Unified Care Workspace; primeira jornada vertical/programa. Control Center interno deve ter fronteira administrativa definida, com entrega faseada na F13.
+Entregas incrementais: navegação por experiência, contexto institucional explícito, permissões server-side, workspace profissional, painel institucional consolidado, Patient multi-instituição segregado, Field, convites e onboarding.
+Gate: jornada completa da entrada ao acompanhamento, decisão profissional, tarefa, retorno e auditoria; isolamento entre experiências e papéis; usabilidade e acessibilidade validadas.
 
 ## FASE 10 — INTEROPERABILITY DELIVERY
 **Dependências:** UIP de referência da Fase 6; ADR-008/009; controles de segurança e proveniência aprovados.
@@ -92,9 +93,9 @@ Gate: avaliação por caso de uso, limites de dado, validação de saída, fallb
 Objetivo: indicadores de programa, jornada, equipe, unidade e rede; filas, capacidade, remoto/presencial, campo, custos e resultados.
 Gate: definições de métricas, qualidade e lineage, privacidade e validação de utilidade. Alegações de economia exigem piloto medido.
 
-## FASE 13 — DEPLOYMENT & OPERATIONS CENTER
-Objetivo: releases reproduzíveis, ambientes, configuração, secrets, observabilidade, backup, recuperação, suporte e atualização.
-Gate: RPO/RTO, restore testado, monitoramento, rollback, gestão de incidentes e runbooks.
+## FASE 13 — PLATFORM CONTROL CENTER & OPERATIONS
+Objetivo: releases reproduzíveis, ambientes, configuração, secrets, observabilidade, backup, recuperação, suporte e atualização; painel interno Tysvora Control Center para tenants, planos/direitos, módulos, conectores, releases, incidentes, suporte e saúde operacional.
+Gate: RPO/RTO, restore testado, monitoramento, rollback, incidentes e runbooks; segregação comprovada entre administração da plataforma e conteúdo clínico; suporte excepcional com finalidade, escopo mínimo e auditoria.
 
 ## FASE 14 — END-TO-END HOMOLOGATION
 Objetivo: homologar cenários integrados, segurança, clínica, acessibilidade, operação, performance e integração.
@@ -125,3 +126,12 @@ Toda execução deve declarar:
 ## Regra de preservação
 
 Fases e execuções históricas não serão renumeradas nem reclassificadas retroativamente. O novo roadmap reorganiza trabalho futuro e adiciona gates. Nenhuma fase posterior fica autorizada automaticamente.
+
+
+## Requisitos transversais — Easy Connect e experiências
+
+- Instituição pode iniciar por cadastro manual ou upload, sem depender de integração externa.
+- Connector Agent é opcional, instalado em ambiente institucional autorizado; navegador administra, agente executa conectividade local.
+- Institutional Workspace Premium pertence à instituição; Control Center pertence à Tysvora.
+- Patient, Professional, Institution e Field são experiências distintas sobre o mesmo Core, com autorização server-side.
+- Homologação mede autonomia institucional, tempo/esforço por fonte, qualidade de mapping, reconciliação, recuperação e reutilização de adapters; não declarar facilidade universal sem pilotos representativos.
