@@ -71,11 +71,13 @@ A presença de um domínio no Blueprint não significa que ele esteja implementa
 
 As experiências são interfaces sobre a mesma plataforma, não produtos isolados:
 
-1. **Tysvora Institution:** gestão institucional, equipes, programas, jornadas, contexto assistencial, comunicação, indicadores, configurações e integrações.
-2. **Tysvora Patient:** uma identidade de acesso para múltiplos relacionamentos institucionais, com isolamento e permissões independentes.
-3. **Tysvora Field:** execução externa, visitas, tarefas, agendas, rotas, evidências e encerramento.
+1. **Tysvora Institution — Institutional Workspace Premium:** painel central de operação e administração da instituição, dentro de seu escopo autorizado.
+2. **Tysvora Professional:** workspace do profissional, com atribuições, contexto assistencial e ações sob sua responsabilidade.
+3. **Tysvora Patient:** identidade de acesso para múltiplos relacionamentos institucionais segregados.
+4. **Tysvora Field:** execução externa, visitas, tarefas, agendas, rotas, evidências e encerramento.
+5. **Tysvora Control Center:** painel interno Tysvora para governança e operação da plataforma, sem acesso clínico global por padrão.
 
-Uma pessoa pode estar vinculada a várias instituições e programas. A interface deve deixar claro em qual contexto institucional o usuário está operando.
+São superfícies distintas sobre o mesmo Core. O Institutional Workspace pertence à instituição; o Control Center pertence à Tysvora. Uma pessoa pode estar vinculada a várias instituições e programas. A interface deve deixar claro o contexto ativo.
 
 ## 7. Princípios arquiteturais
 
@@ -184,15 +186,7 @@ Não é cópia integral de todos os prontuários. Deve preservar autoria, fonte,
 
 ## 14. Integração e interoperabilidade
 
-O Universal Integration Platform (UIP) deve suportar:
-- APIs, OAuth, webhooks e credenciais rotacionáveis;
-- bancos externos com contas e permissões mínimas, somente leitura quando possível;
-- arquivos CSV, XLSX, XML, JSON, OFX e documentos;
-- agente local para redes e sistemas locais;
-- padrões de saúde, incluindo HL7 FHIR R4 e RNDS quando aplicáveis e homologados;
-- conectores específicos e importação assistida.
-
-Integração não implica equivalência semântica. Cada dado deve manter origem, identificador externo, momento de origem/ingestão, transformação, versão do mapeamento, autoria, qualidade e estado de sincronização. Conflitos devem ser reconciliados segundo políticas explícitas, nunca por sobrescrita silenciosa.
+A UIP deve suportar API, Database, File/Document, Secure Transfer, Healthcare Interoperability, Messaging, Local Connector Agent, Legacy/Proprietary Adapters e UI Automation como último recurso. Também deve aceitar upload, cadastro manual e fontes CRM/ERP. Easy Connect fornece onboarding self-service, discovery, mapping assistido, preview, aprovação e monitoramento. A instituição pode começar sem integração e evoluir progressivamente. O Connector Agent executa acesso local autorizado; o navegador apenas administra e configura. Contratos, manifests, adapters, mappings e schemas são versionados; dados mantêm origem, autoria, transformação, qualidade e lineage. Conflitos são reconciliados por política explícita, nunca por sobrescrita silenciosa.
 
 ## 15. Governança clínica e segurança
 
