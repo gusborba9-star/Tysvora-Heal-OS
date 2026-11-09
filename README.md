@@ -45,4 +45,4 @@ Nenhum código do Veritas-OS é presumido incorporado. Reutilização futura exi
 
 ## Status
 
-Em construção. Fase 3 — Heal Core — permanece com o estado histórico registrado no Roadmap. Esta documentação não declara nova funcionalidade implementada nem autoriza expansão de código.
+Em construção. Fase 2A — Product & Architecture Lock — está concluída no escopo documental; consulte `docs/architecture/PHASE-2A-CLOSURE-REPORT.md`. Fase 3 — Heal Core — permanece com o estado histórico registrado no Roadmap. Esta documentação não declara nova funcionalidade implementada nem autoriza expansão automática de código.
