@@ -268,3 +268,38 @@ Nenhuma otimização local pode comprometer a capacidade universal, a segurança
 ## 24. Decisões ainda abertas
 
 Não presumir decisões definitivas sobre: stack futura além do que já está documentado, topologia de serviços, broker, FHIR/RNDS por integração, mecanismo de assinatura, identidade externa, armazenamento documental, analytics, RPO/RTO, operação offline, implantação municipal, modelo comercial e certificações. Cada decisão exige ADR, evidência e aprovação.
+
+ 
+## 25. Easy Connect, autoatendimento e integração progressiva
+
+A UIP deve maximizar a abrangência tecnológica e minimizar a complexidade percebida pela instituição. A experiência Tysvora Easy Connect permite configurar, testar, homologar e monitorar integrações por autoatendimento, sem exigir consultoria técnica do Tysvora em cada implantação.
+
+A instituição pode começar sem integração técnica e evoluir progressivamente: cadastro manual → upload/importação → conexão API/DB/CRM → Connector Agent → sincronização governada. Todos os caminhos convergem para os mesmos mecanismos de identidade, validação, proveniência, autorização e reconciliação.
+
+Modalidades: API (REST, GraphQL, SOAP, OAuth/OIDC, webhooks); Database (PostgreSQL, MySQL, SQL Server, Oracle e outros drivers aprovados); File & Document (CSV, XLSX, XML, JSON, OFX, PDF e imagens); Secure Transfer (SFTP/FTPS); padrões de saúde (HL7 v2, FHIR R4, RNDS, TISS, DICOM conforme perfil e homologação); mensageria; adapters legados/proprietários; UI Automation como último recurso controlado; Universal Data Intake para upload, importação recorrente, cadastro manual e CRM/ERP/gestão.
+
+O Tysvora Connector Agent é um runtime leve, opcional, baixado pelo painel e instalado em máquina/servidor autorizado. O navegador administra download, pareamento e configuração; não acessa arbitrariamente a rede local. O agente executa conectividade local, preferencialmente por conexões outbound autenticadas e criptografadas, com identidade própria, permissões mínimas, credenciais protegidas, pacotes assinados, allowlists, logs, atualização segura, suspensão e revogação remota. Não exige portas inbound como padrão.
+
+A UIP separa Control Plane (registry, manifests, contracts, capabilities, credenciais, políticas, mappings, aprovações e lifecycle) de Data Plane (runtime, agente, discovery, extraction, ingestion, transformation, validation, reconciliation, sync e observability). Contratos, pacote, manifest, mapping e schema possuem versões independentes e compatibilidade declarada. Capability negotiation identifica capacidades reais da instância.
+
+Upload e cadastro manual são capacidades de primeira classe. Importações exigem preview, validação, quarentena, sugestão de mapping, revisão humana, detecção de duplicidade, relatório de aceitos/rejeitados, autoria, timestamp e lineage. CRM/ERP podem fornecer dados relacionais e operacionais, mantendo separação de finalidade e permissões em relação a dados clínicos. Escrita externa exige capacidade explícita, autorização e interface oficial; escrita direta em tabelas externas não é padrão.
+
+O pipeline preserva Source Data, Normalized Data e Canonical Domain Data, incluindo campos desconhecidos e proveniência. Inclui identity resolution governada, qualidade, autoridade por atributo, conflitos e reconciliação. Não aplicar sobrescrita silenciosa ou last-write-wins indiscriminado. Modos de sincronização incluem real-time, near-real-time, polling, batch, incremental, full reconciliation e on-demand, com checkpoints, idempotência, retry/backoff, dead-letter, replay auditado e observabilidade.
+
+Universal significa arquitetura extensível por adapters e contratos, não compatibilidade automática com qualquer tecnologia futura nem necessidade de construir todos os conectores antecipadamente. Novas tecnologias podem exigir evolução localizada/versionada sem reconstruir o Universal Core.
+
+## 26. Experiências de produto e painéis administrativos
+
+As experiências operacionais são Patient, Professional, Institution e Field. Compartilham Core, identidade, domínio, APIs e eventos, mas possuem navegação, contexto e autorização distintos.
+
+**Tysvora Institution — Institutional Workspace Premium:** painel central da instituição para administrar e operar organizações/unidades autorizadas, profissionais, pacientes vinculados, programas, jornadas, filas, manifestações, tarefas, comunicação, integrações, indicadores, configurações e governança local. Visão completa significa abrangência operacional dentro da instituição, finalidade e permissões do usuário; não acesso irrestrito a todo conteúdo clínico.
+
+**Tysvora Professional:** workspace do profissional com agenda/atribuições, pacientes e sujeitos sob sua responsabilidade, contexto assistencial autorizado, manifestações, planos, documentos, decisões, ordens, tarefas, comunicação e acompanhamento. Não concede automaticamente privilégios administrativos institucionais.
+
+**Tysvora Patient:** identidade de acesso para múltiplos relacionamentos institucionais segregados, com planos, orientações, mensagens, documentos, programas e manifestações. Compartilhamento entre instituições não ocorre por padrão.
+
+**Tysvora Field:** experiência de execução externa com tarefas, visitas, agenda, território, rotas, formulários, evidências e encerramento, com acesso mínimo e proteção do dispositivo.
+
+**Tysvora Control Center:** painel interno e privilegiado da operação Tysvora para governar tenants, organizações contratantes, planos/direitos, módulos, conectores homologados, versões, disponibilidade, suporte, incidentes, métricas técnicas, billing e políticas globais. Visão completa significa visão operacional e de governança da plataforma, não acesso irrestrito ao conteúdo clínico de todos os tenants. Acesso excepcional a dados de cliente exige finalidade, autorização, escopo mínimo, justificativa, duração limitada e auditoria, conforme base legal e contrato.
+
+O Institutional Workspace Premium pertence à instituição e governa sua operação; o Control Center pertence à Tysvora e governa a plataforma. Nenhuma interface pode usar ocultação visual como substituto de autorização server-side.
