@@ -35,11 +35,15 @@ docs/          governance and specifications
 
 A documentação anterior registra TypeScript, React, Next.js, PostgreSQL, Supabase, Vercel, OpenRouter e GitHub como escolhas/avaliações técnicas. Manter domínio independente de framework e fornecedor. PostgreSQL permanece âncora relacional; Supabase/Vercel são plataformas operacionais substituíveis. OpenRouter é opcional e acessado apenas via AI Gateway.
 
-## 5. Heal Core — responsabilidades
+## 5. Heal Core — fronteira alvo e estado comprovado
 
-Identity, tenancy, organizations, units, users, professional identity/context, access control, configuration, audit, event contracts, notification orchestration, workflow primitives, document metadata, integration registry, observability contracts e module governance.
+**Fronteira alvo do Core:** identidade, tenancy, organizações, unidades, contexto de requisição, autorização transversal, configuração, auditoria e contratos fundamentais de eventos. O Core pode oferecer ports e contratos para capacidades transversais, mas não deve absorver regras de domínio de programas, clínica, integração ou operação.
 
-Core não deve incorporar protocolos clínicos, regras de especialidade ou fluxos específicos de programa. CareSubject pode ser referenciado pelo Core para identidade/relacionamento, mantendo semântica clínica em bounded contexts.
+**Estado comprovado no repositório:** consultar `docs/core/CORE-FOUNDATION.md` e `docs/core/APPLICATION-LAYER.md`. A fundação histórica implementa contratos de domínio, contexto, RBAC básico, configuração contextual, contratos de auditoria/eventos e abstrações de repositório/identidade, com implementações em memória para testes. Não implementa persistência real, RLS, provedor externo de autenticação, broker, Module Registry, UIP, workflow produtivo, notificações externas, documentos, engines clínicos, Sentinela, IA ou deployment.
+
+**Capacidades da plataforma que não devem ser confundidas com o Core já entregue:** notification orchestration, workflow/task, document metadata, integration registry, observability operacional e module governance são capacidades/contratos de plataforma a construir nas fases correspondentes. Não declarar como implementadas por constarem nesta arquitetura.
+
+Core não incorpora protocolos clínicos, regras de especialidade ou fluxos específicos de programa. CareSubject pode ser referenciado pelo Core para identidade/relacionamento, mantendo semântica clínica em bounded contexts.
 
 ## 6. Motores e fronteiras
 
