@@ -1,29 +1,29 @@
 # Architecture Decision Record Register
 
-**Status:** registro inicial; decisões não aprovadas permanecem abertas.  
+**Status:** baseline de decisões revisado para fechamento da Fase 2A. ADRs continuam abertos até decisão formal documentada; isso não impede a conclusão documental da Fase 2A.  
 **Formato:** cada ADR deve conter contexto, opções, decisão, justificativa, consequências, riscos, segurança/privacidade, migração e evidência.  
 **Regra:** não transformar preferência técnica em decisão aprovada sem aceite explícito.
 
-| ADR | Tema | Estado | Dependência/observação |
+| ADR | Tema | Estado | Gate e dependência |
 |---|---|---|---|
-| ADR-001 | Topologia de implantação: monólito modular, serviços ou híbrido | ABERTO | decidir por blast radius, escala, custo e operação |
-| ADR-002 | Broker, outbox/inbox e garantias de eventos | ABERTO | antes de eventos críticos assíncronos em produção |
-| ADR-003 | Persistência, schemas, ownership e estratégia de migração | ABERTO | preservar Core e isolamento tenant |
-| ADR-004 | Identidade de CareSubject, matching e resolução de duplicidade | ABERTO | bloqueia matching automático e integração clínica segura |
-| ADR-005 | Autorização contextual, purpose limitation e break-glass | ABERTO | critérios verificáveis antes de dados reais |
-| ADR-006 | Consentimento, bases legais, retenção e direitos do titular | ABERTO | revisão jurídica/encarregado por jurisdição e finalidade |
-| ADR-007 | Repositório documental, integridade, assinatura e verificação | ABERTO | necessário para ordens e prescrições juridicamente válidas |
-| ADR-008 | Estratégia UIP: conectores, agente local, credenciais e atualização | ABERTO | threat model e conector de referência |
-| ADR-009 | FHIR/RNDS: perfis, recursos, terminologias e homologação | ABERTO | decidir por caso de uso e contrato institucional |
-| ADR-010 | Busca, indexação e projeções de Care Context | ABERTO | não replicar conteúdo sensível indiscriminadamente |
-| ADR-011 | Analytics store, lineage e segregação analítica | ABERTO | após métricas e volumes definidos |
-| ADR-012 | Operação offline, sincronização e proteção do dispositivo | ABERTO | threat model específico para Field |
-| ADR-013 | SLO, HA, backup, RPO/RTO e recuperação | ABERTO | antes de produção |
-| ADR-014 | AI Gateway: provedores, retenção, avaliação e roteamento | ABERTO | IA é opcional e subordinada a policy |
-| ADR-015 | Escopo regulatório, assinatura e prescrição eletrônica no Brasil | ABERTO | parecer jurídico/técnico e validação de requisitos vigentes |
-| ADR-016 | Estratégia de tenancy e fronteiras Organization/Unit/Program | ABERTO | compatibilidade com Core atual e testes negativos |
-| ADR-017 | Modelo de comunicação, canais, entrega e contingência | ABERTO | separar mensagem, notificação e ocorrência |
-| ADR-018 | Modelo de programa configurável e linguagem declarativa segura | ABERTO | limites entre configuração, protocolo e código |
+| ADR-001 | Topologia de implantação: monólito modular, serviços ou híbrido | ABERTO — DEFERÍVEL | decidir por blast radius, escala, custo e operação; antes de decomposição em serviços |
+| ADR-002 | Broker, outbox/inbox e garantias de eventos | ABERTO — BLOQUEIA F6 PRODUTIVA | antes de eventos críticos assíncronos; contrato conceitual pode ser especificado antes |
+| ADR-003 | Persistência, schemas, ownership e estratégia de migração | ABERTO — BLOQUEIA MIGRAÇÕES F3 | preservar Core e isolamento tenant; fechar antes de persistência/migrações novas |
+| ADR-004 | Identidade de CareSubject, matching e resolução de duplicidade | ABERTO — BLOQUEIA MATCHING AUTOMÁTICO | bloqueia vinculação automática e ingestão clínica reconciliada; exige política de evidência, confiança, revisão e desfazimento |
+| ADR-005 | Autorização contextual, purpose limitation e break-glass | ABERTO — BLOQUEIA DADOS REAIS | critérios verificáveis antes de dados reais em novos engines/conectores |
+| ADR-006 | Consentimento, bases legais, retenção e direitos do titular | ABERTO — BLOQUEIA PRODUÇÃO COM DADOS PESSOAIS | revisão jurídica/encarregado por jurisdição e finalidade; consentimento não é base universal |
+| ADR-007 | Repositório documental, integridade, assinatura e verificação | ABERTO — BLOQUEIA DOCUMENTO REGULADO | necessário antes de emitir/armazenar ordens e prescrições como documentos válidos |
+| ADR-008 | Estratégia UIP: conectores, agente local, credenciais e atualização | ABERTO — BLOQUEIA CONECTOR PRODUTIVO | threat model, ciclo de atualização e conector de referência |
+| ADR-009 | FHIR/RNDS: perfis, recursos, terminologias e homologação | ABERTO — POR INTEGRAÇÃO | decidir por caso de uso, perfil e contrato institucional; não bloqueia UIP genérico |
+| ADR-010 | Busca, indexação e projeções de Care Context | ABERTO — DEFERÍVEL | fechar antes de indexar dados sensíveis ou escalar projeções |
+| ADR-011 | Analytics store, lineage e segregação analítica | ABERTO — DEFERÍVEL | após métricas, volume e finalidade definidos; antes de analytics sensível em escala |
+| ADR-012 | Operação offline, sincronização e proteção do dispositivo | ABERTO — BLOQUEIA OFFLINE | threat model específico para Field; experiência online pode ser construída sem offline |
+| ADR-013 | SLO, HA, backup, RPO/RTO e recuperação | ABERTO — BLOQUEIA PRODUÇÃO | antes de produção e homologação operacional final |
+| ADR-014 | AI Gateway: provedores, retenção, avaliação e roteamento | ABERTO — DEFERÍVEL | antes de habilitar IA com dados reais; IA é opcional |
+| ADR-015 | Escopo regulatório, assinatura e prescrição eletrônica no Brasil | ABERTO — BLOQUEIA PRESCRIÇÃO PRODUTIVA | parecer jurídico/técnico e validação dos requisitos vigentes antes de emissão válida |
+| ADR-016 | Estratégia de tenancy e fronteiras Organization/Unit/Program | ABERTO — BLOQUEIA F5 | compatibilidade com Core atual, modelo de acesso e testes negativos |
+| ADR-017 | Modelo de comunicação, canais, entrega e contingência | ABERTO — BLOQUEIA CANAL PRODUTIVO | separar mensagem, notificação e ocorrência; definir SLA, contingência e confirmação |
+| ADR-018 | Modelo de programa configurável e linguagem declarativa segura | ABERTO — BLOQUEIA F7 | limites entre configuração, protocolo e código; validação e sandbox de configuração |
 
 ## Ordem sugerida
 
