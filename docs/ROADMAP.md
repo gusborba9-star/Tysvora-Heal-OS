@@ -20,7 +20,7 @@ Preservar commit e aceite existentes. A conclusão documental original não repr
 A arquitetura técnica existente permanece como base; documentos são atualizados sem apagar histórico de aprovação. A nova visão exige revisão de arquitetura antes de implementação de novas capacidades.
 
 ## FASE 2A — PRODUCT & ARCHITECTURE LOCK
-**STATUS: DOCUMENTAÇÃO EM REVISÃO**
+**STATUS: CONCLUÍDA/APROVADA — ESCOPO DOCUMENTAL (2026-11-09)**
 Objetivo: alinhar Blueprint, experiências, domínio universal, programas, jornadas, governança clínica, integração, dados e benchmark.
 Entregáveis:
 - Blueprint 2.0;
@@ -38,8 +38,10 @@ Entregáveis:
 - `docs/architecture/ENGINE-CONTRACTS.md` — fronteiras, ownership, comandos, eventos e dependências dos engines;
 - `docs/architecture/ADR-REGISTER.md` — registro de decisões abertas e ordem sugerida;
 - `docs/architecture/TRACEABILITY-MATRIX.md` — rastreabilidade Blueprint → Roadmap → Especificações → Execuções;
-- `docs/architecture/E2E-ARCHITECTURE-SCENARIOS.md` — oito cenários de arquitetura ponta a ponta.
-Gate: referências documentais válidas; fronteiras e ownership sem sobreposição crítica; oito cenários E2E modelados; ADRs abertos com dependências; matriz de rastreabilidade cobrindo requisitos; riscos e lacunas explícitos; aceite formal do CTO. Nenhum código novo autorizado por esta fase.
+- `docs/architecture/E2E-ARCHITECTURE-SCENARIOS.md` — oito cenários de arquitetura ponta a ponta;
+- `docs/architecture/PHASE-2A-CLOSURE-REPORT.md` — auditoria, evidências, riscos residuais e decisão de fechamento.
+
+**Resultado do gate:** documentação, fronteiras, rastreabilidade, cenários e decisões pendentes revisados. Fechamento limitado ao escopo documental por solicitação explícita do CTO em 2026-11-09. ADRs permanecem abertos conforme seus gates. Nenhum código, migração, dado real ou deploy é autorizado automaticamente por esta conclusão.
 
 ## FASE 3 — HEAL CORE
 **STATUS HISTÓRICO: EM EXECUÇÃO**
