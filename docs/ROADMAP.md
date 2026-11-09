@@ -35,8 +35,11 @@ Entregáveis:
 - Field Operations;
 - Capacity Optimization;
 - Competitive Benchmark;
-- ADRs e matriz de rastreabilidade.
-Gate: consistência documental, cenários E2E modelados, lacunas e decisões pendentes explícitas, aceite CTO. Nenhum código novo autorizado por esta fase.
+- `docs/architecture/ENGINE-CONTRACTS.md` — fronteiras, ownership, comandos, eventos e dependências dos engines;
+- `docs/architecture/ADR-REGISTER.md` — registro de decisões abertas e ordem sugerida;
+- `docs/architecture/TRACEABILITY-MATRIX.md` — rastreabilidade Blueprint → Roadmap → Especificações → Execuções;
+- `docs/architecture/E2E-ARCHITECTURE-SCENARIOS.md` — oito cenários de arquitetura ponta a ponta.
+Gate: referências documentais válidas; fronteiras e ownership sem sobreposição crítica; oito cenários E2E modelados; ADRs abertos com dependências; matriz de rastreabilidade cobrindo requisitos; riscos e lacunas explícitos; aceite formal do CTO. Nenhum código novo autorizado por esta fase.
 
 ## FASE 3 — HEAL CORE
 **STATUS HISTÓRICO: EM EXECUÇÃO**
@@ -45,19 +48,23 @@ Objetivo: concluir e validar capacidades transversais previstas, incluindo persi
 Gate adicional: validar o Core contra Person/UserIdentity/Professional/CareSubject/Guardian e relacionamentos multi-institucionais sem inserir regras clínicas no Core. Não alterar contratos já validados sem ADR e regressão.
 
 ## FASE 4 — PLATFORM & MODULE GOVERNANCE
+**Dependências:** Fase 3 e contratos de engine aprovados. Pode iniciar desenho documental em paralelo, mas ativação técnica depende de autorização e isolamento da Fase 5.
 Objetivo: Module Registry, manifests, versões, dependências, contratos, feature flags, ciclo de vida e governança de configurações.
-Gate: módulos podem ser ativados/suspensos com auditoria; feature flags nunca substituem autorização.
+Gate: módulos podem ser ativados/suspensos com auditoria; compatibilidade, rollback e ownership verificados; feature flags nunca substituem autorização.
 
 ## FASE 5 — IDENTITY, SECURITY & PRIVACY
+**Dependências:** contratos do Core da Fase 3; decisões ADR-004, ADR-005 e ADR-016.
 Objetivo: identidade, RBAC + ABAC/contexto, tenancy, multi-instituição, consentimentos/base legal, segregação, auditabilidade, LGPD e controles técnicos.
-Gate: testes negativos entre tenants, organizações, unidades, programas e relacionamentos; revogação e break-glass auditados.
+Gate: testes negativos entre tenants, organizações, unidades, programas, CareSubject e Guardian; revogação, purpose limitation e break-glass auditados. É pré-requisito para dados reais em engines e conectores.
 
 ## FASE 6 — UNIVERSAL ENGINES & INTEGRATION FOUNDATION
+**Dependências:** contratos da Fase 3; controles mínimos da Fase 5; ADR-002, ADR-008 e ADR-017 para produção de eventos/conectores/comunicação.
 Objetivo: contratos e capacidades compartilhadas de workflow, tarefas, notificações, documentos, busca, comunicação, integração e proveniência.
 Entregas incrementais: Integration Gateway/UIP, conectores API, arquivos, DB, agente local; ingestão, mapeamento, qualidade, sincronização e reconciliação.
-Gate: conector de referência ponta a ponta com origem, idempotência, falha, retry, reconciliação e auditoria.
+Gate: conector de referência ponta a ponta com origem, idempotência, falha, retry, reconciliação e auditoria; testes negativos de isolamento e replay.
 
 ## FASE 7 — DOMAIN, PROGRAM & CLINICAL GOVERNANCE
+**Dependências:** Fases 3 e 5; Fase 6 para dependências de workflow/eventos quando usadas; ADR-004, ADR-006, ADR-007, ADR-015 e ADR-018 conforme escopo.
 Objetivo: modelo universal de domínio, Program Engine, CarePathway, protocolos, instrumentos, ordens/documentos e limites profissionais.
 Gate: cinco cenários mínimos — tabagismo UBS, diabetes rede, depressão clínica, nutrição individual e veterinária — modelados sem duplicar Core. Homologação clínica/legal separada de testes técnicos.
 
@@ -66,10 +73,12 @@ Objetivo: sinais, regras, alertas, escalonamento, filas, atrasos, anomalias e ex
 Gate: alertas com fonte, regra, prioridade, destinatário, falso positivo monitorado e ação humana. Não emitir diagnóstico autônomo.
 
 ## FASE 9 — CARE EXPERIENCE & FIRST VERTICAL/PROGRAM
+**Dependências:** Fases 3, 5, 6 e 7; contratos API e segurança aprovados.
 Objetivo: Institution, Patient e Field experiences; Unified Care Workspace; primeira jornada vertical/programa.
 Gate: jornada completa da entrada ao acompanhamento, decisão profissional, tarefa, retorno e auditoria; usabilidade e acessibilidade validadas.
 
 ## FASE 10 — INTEROPERABILITY DELIVERY
+**Dependências:** UIP de referência da Fase 6; ADR-008/009; controles de segurança e proveniência aprovados.
 Objetivo: conectores homologados, mapeamentos, FHIR/RNDS quando aplicáveis, monitoramento e operação de sincronização.
 Gate: homologação por sistema e fonte. Nunca declarar interoperabilidade universal por suportar um padrão apenas.
 
