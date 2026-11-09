@@ -39,3 +39,17 @@
 ## Regras de atualização
 
 Toda execução deve referenciar os requisitos/IDs afetados e atualizar status com evidência. Status permitidos: NÃO INICIADO, ESPECIFICADO, EM EXECUÇÃO, EM AUDITORIA, CONCLUÍDO/APROVADO, BLOQUEADO. Um requisito só muda para CONCLUÍDO/APROVADO com evidência técnica e aceite formal.
+
+
+## Requisitos adicionais — autoatendimento e superfícies
+
+| Capacidade / requisito | Blueprint | Roadmap | Especificação normativa | Fase/execução futura | Evidência exigida |
+|---|---|---|---|---|---|
+| Easy Connect e Progressive Integration | §14, §25 | F6, F10 | UNIVERSAL-INTEGRATION; PRODUCT-EXPERIENCE | F6/F10 | onboarding self-service, teste, aprovação, monitoramento e recuperação |
+| Connector Agent local | §14, §25 | F6, F10, F13 | UNIVERSAL-INTEGRATION; ADR-008/020 | F6/F10 | pareamento, outbound seguro, assinatura, atualização, isolamento e revogação |
+| Universal Data Intake: upload/manual/CRM/ERP | §14, §19, §25 | F6, F9 | UNIVERSAL-INTEGRATION; PRODUCT-EXPERIENCE | F6/F9 | preview, quarantine, mapping, lineage, duplicidade e aprovação |
+| Institutional Workspace Premium | §6, §26 | F9 | PRODUCT-EXPERIENCE | F9 | visão institucional com escopo, filtros por papel/finalidade e isolamento |
+| Tysvora Professional | §6, §26 | F9 | PRODUCT-EXPERIENCE; CARE-CONTINUITY | F9 | workspace profissional, autoria, vínculo e autorização |
+| Tysvora Patient | §6, §26 | F9 | PRODUCT-EXPERIENCE; SECURITY | F9 | multi-instituição segregada, convite, revogação e acesso mínimo |
+| Tysvora Field | §6, §26 | F9 | PRODUCT-EXPERIENCE; FIELD-OPERATIONS | F9 | tarefa/visita, proteção de dispositivo e sincronização |
+| Tysvora Control Center | §6, §26 | F13 | PRODUCT-EXPERIENCE; SECURITY; MODULE-ARCHITECTURE | F13 | administração da plataforma sem acesso clínico global; suporte excepcional auditado |
