@@ -53,3 +53,21 @@ Toda execução deve referenciar os requisitos/IDs afetados e atualizar status c
 | Tysvora Patient | §6, §26 | F9 | PRODUCT-EXPERIENCE; SECURITY | F9 | multi-instituição segregada, convite, revogação e acesso mínimo |
 | Tysvora Field | §6, §26 | F9 | PRODUCT-EXPERIENCE; FIELD-OPERATIONS | F9 | tarefa/visita, proteção de dispositivo e sincronização |
 | Tysvora Control Center | §6, §26 | F13 | PRODUCT-EXPERIENCE; SECURITY; MODULE-ARCHITECTURE | F13 | administração da plataforma sem acesso clínico global; suporte excepcional auditado |
+
+
+## Requisitos adicionais — sistema principal, comunicação e monetização
+
+| Capacidade / requisito | Blueprint | Roadmap | Especificação normativa | Fase/execução futura | Evidência exigida |
+|---|---|---|---|---|---|
+| Clinical Record Core nativo / modo Primary System | §27 | F7, F9, F17 | PRIMARY-CLINICAL-SYSTEM; DOMAIN-MODEL; CLINICAL-GOVERNANCE | F17 | E2E cadastro → Encounter → evolução → plano/documento → continuidade |
+| Modo Integrated Platform e Hybrid | §14, §27 | F6, F10, F17 | PRIMARY-CLINICAL-SYSTEM; UNIVERSAL-INTEGRATION; DATA-PROVENANCE | F17 | autoridade por atributo, reconciliação, sem duplicidade ou conflito silencioso |
+| Secure Care Messaging bidirecional | §9, §28 | F6, F9, F17 | CARE-MESSAGING-RELATIONSHIP-LIFECYCLE; ENGINE-CONTRACTS | F17 | envio/recebimento, contexto, entrega, retry, autorização e auditoria |
+| Anexos seguros no chat | §28 | F6, F17 | CARE-MESSAGING-RELATIONSHIP-LIFECYCLE | F17 | validação de arquivo, malware, URLs temporárias, criptografia e acesso |
+| Clinical Document Management | §11, §15, §28 | F7, F9, F17 | PRIMARY-CLINICAL-SYSTEM; CLINICAL-GOVERNANCE | F17 | autoria, assinatura válida quando exigida, integridade, versão e status |
+| Áudio opcional com controle administrativo | §28 | F13, F17 | CARE-MESSAGING-RELATIONSHIP-LIFECYCLE | F17 | default off, flag global/plano, opt-in institucional, limites, custo e retenção |
+| Silenciar e preferências de comunicação | §29 | F9, F17 | CARE-MESSAGING-RELATIONSHIP-LIFECYCLE | F17 | notificações comuns silenciadas sem suprimir alertas críticos |
+| Encerrar/transferir CareRelationship | §11, §29 | F5, F7, F9, F17 | CARE-MESSAGING-RELATIONSHIP-LIFECYCLE; SECURITY | F17 | histórico preservado, justificativa, transição, direitos e auditoria |
+| Tysvora Store / catálogo comercial | §30 | F18 | MODULAR-COMMERCE-STORE | F18 | catálogo dinâmico e elegibilidade por tenant |
+| Planos, franquias e acessos adicionais | §30 | F18 | MODULAR-COMMERCE-STORE | F18 | limites, excedentes, contagem de ativos e isolamento |
+| Add-ons e provisionamento automático | §30 | F4, F18 | MODULAR-COMMERCE-STORE; MODULE-ARCHITECTURE | F18 | contratação → entitlement → provisionamento → uso |
+| Billing, metering e reconciliação | §30 | F18 | MODULAR-COMMERCE-STORE | F18 | consumo, fatura, pagamento, reconciliação, cancelamento e inadimplência |
