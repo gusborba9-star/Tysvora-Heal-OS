@@ -136,3 +136,48 @@ Fases e execuções históricas não serão renumeradas nem reclassificadas retr
 - Institutional Workspace Premium pertence à instituição; Control Center pertence à Tysvora.
 - Patient, Professional, Institution e Field são experiências distintas sobre o mesmo Core, com autorização server-side.
 - Homologação mede autonomia institucional, tempo/esforço por fonte, qualidade de mapping, reconciliação, recuperação e reutilização de adapters; não declarar facilidade universal sem pilotos representativos.
+
+
+## FASE 17 — NATIVE CLINICAL SYSTEM & CARE MESSAGING
+
+**STATUS: PLANEJADA — NÃO IMPLEMENTADA**
+**Dependências:** Fases 3, 5, 6 e 7; Fase 9 para experiências; ADRs de domínio, segurança, documentos, comunicação e assinatura aplicáveis.
+
+**Objetivo:** permitir que Tysvora seja sistema principal de clínicas/instituições sem sistema adequado, além de continuar operando como plataforma integrada ou híbrida para organizações que preservam sistemas externos.
+
+**Entregas incrementais:**
+- Clinical Record Core nativo: cadastro assistencial, Encounter, evolução, CarePlan, ordens, documentos, autoria, versão, integridade e auditoria;
+- configuração do modo Primary System, Integrated Platform ou Hybrid por instituição/domínio, com autoridade por atributo e fonte de verdade explícitas;
+- Secure Care Messaging bidirecional entre paciente e profissional;
+- anexos privados de imagem, PDF e documentos com validação, limites, antivírus, criptografia, URLs temporárias e auditoria;
+- Clinical Document Management para prescrição, atestado, laudo, resultado, solicitação, encaminhamento e orientação;
+- preferências de comunicação, silenciamento individual, encaminhamento e gestão de vínculo;
+- encerramento e transferência de CareRelationship sem exclusão de Person, CareSubject, histórico ou documentos;
+- controles de continuidade, urgência, acesso legítimo a documentos e retenção.
+
+**Áudio:** capacidade opcional, fora do padrão inicial, desabilitada por padrão. Disponibilidade global/plano controlada pelo Control Center; ativação por instituição somente quando liberada e contratada. Custos, limites, retenção, segurança e eventual transcrição precisam ser medidos e homologados. Não é requisito para o gate inicial do chat.
+
+**Gate:** testes E2E de sistema principal, integrado e híbrido; autoridade por atributo sem conflitos silenciosos; mensagens bidirecionais e anexos seguros; documento clínico versionado e legalmente válido quando exigido; silêncio sem perda de alertas críticos; encerramento/transferência com continuidade, direitos e auditoria. Não declarar substituição integral de EHR/ERP sem homologação específica.
+
+## FASE 18 — MODULAR COMMERCE & TYSVORA STORE
+
+**STATUS: PLANEJADA — NÃO IMPLEMENTADA**
+**Dependências:** F3 (tenancy/identidade), F4 (Module Registry/feature flags), F5 (segurança), F6 (UIP/serviços medidos), F13 (Control Center/operations), F14 (homologação) e F15 (readiness de produção). Cobrança produtiva depende também de provedor, contratos, regras fiscais e reconciliação validados.
+
+**Objetivo:** entregar catálogo comercial dinâmico, contratação self-service e ativação por instituição, com governança central e direitos/limites efetivos.
+
+**Entregas incrementais:**
+1. Plan Catalog e Add-on Catalog, com Start, Institution, Network e Public & Enterprise;
+2. definição de franquias por plano: profissionais, administradores, unidades e capacidades; compra de acessos adicionais;
+3. catálogo de adicionais: UIP Advanced, Connector Agent adicional, Field Operations, Sentinela Intelligence, Advanced Analytics, Communication Hub, AI Services e Premium Support/SLA;
+4. Tysvora Store no Institutional Workspace: elegibilidade, preço, contratação, upgrade/downgrade, cancelamento e histórico;
+5. Control Center: gestão de produtos, preços, versões, disponibilidade, contratos, assinaturas, direitos, capacidade e políticas;
+6. Feature Entitlements e Capacity Entitlements isolados por organização;
+7. Provisioning Engine para ativação/suspensão auditável;
+8. Usage Metering para IA, OCR, mensageria, áudio opcional e demais recursos variáveis;
+9. Billing, invoices, pagamento, conciliação, inadimplência, tolerância, renovação e reativação;
+10. Revenue Analytics, trilha comercial e reconciliação com direitos efetivos.
+
+**Referência comercial inicial (não aprovada para publicação/cobrança):** Start R$ 199/mês; Institution R$ 899/mês; Network R$ 3.990/mês; Public & Enterprise a partir de R$ 12.000/mês. Add-ons de referência: UIP Advanced R$ 699; Connector Agent adicional R$ 299; Field Operations R$ 899; Sentinela Intelligence R$ 699; Advanced Analytics R$ 499; Communication Hub R$ 249; AI Services a partir de R$ 99 por pacote/consumo; Premium Support/SLA R$ 699. Implantação assistida, integrações especiais e migração são serviços separados. Preços e franquias exigem validação de unit economics e disposição de pagamento.
+
+**Gate:** contratação real em sandbox e testes financeiros; isolamento por tenant; rights enforcement server-side; provisionamento, cancelamento e downgrade sem inconsistência; medição reconciliada; inadimplência e reativação testadas; conciliação financeira; auditoria; testes de abuso e falha. Nenhum preço ou produto pode ser publicado/cobrado antes do aceite formal e da evidência de operação.
