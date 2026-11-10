@@ -297,3 +297,66 @@ As experiências operacionais são Patient, Professional, Institution e Field. C
 **Tysvora Control Center:** painel interno e privilegiado da operação Tysvora para governar tenants, organizações contratantes, planos/direitos, módulos, conectores homologados, versões, disponibilidade, suporte, incidentes, métricas técnicas, billing e políticas globais. Visão completa significa visão operacional e de governança da plataforma, não acesso irrestrito ao conteúdo clínico de todos os tenants. Acesso excepcional a dados de cliente exige finalidade, autorização, escopo mínimo, justificativa, duração limitada e auditoria, conforme base legal e contrato.
 
 O Institutional Workspace Premium pertence à instituição e governa sua operação; o Control Center pertence à Tysvora e governa a plataforma. Nenhuma interface pode usar ocultação visual como substituto de autorização server-side.
+
+
+## 27. Modos de operação: sistema principal e plataforma integrada
+
+Tysvora deve operar em dois modos complementares, configuráveis por instituição e combináveis na mesma organização:
+
+**Modo Primary System (sistema principal):** para clínicas, consultórios e instituições sem sistema adequado. Tysvora fornece o núcleo assistencial nativo necessário ao escopo contratado: cadastro e identidade de pacientes/sujeitos, profissionais e equipes, agenda/atendimentos conforme módulo, Encounter, evolução profissional, CarePlan, ordens, documentos clínicos, comunicação, acompanhamento, programas, tarefas, auditoria e indicadores.
+
+**Modo Integrated Platform (plataforma integrada):** para organizações que mantêm prontuário, ERP ou sistemas especializados. Tysvora conecta fontes autorizadas, reconcilia contexto, coordena continuidade, comunicação e operações, sem exigir substituição do sistema de origem. Escrita de volta só ocorre por interface oficial, capability declarada e autorização explícita.
+
+A instituição pode combinar os modos: manter faturamento ou prontuário especializado externo e utilizar o Clinical Record Core nativo para domínios ou fluxos não cobertos, desde que ownership, autoridade por atributo, fonte, sincronização e responsabilidade estejam definidos. Não pode haver dois registros concorrentes tratados como autoridade sem política explícita.
+
+**Clinical Record Core** é uma capacidade nativa do produto, não um compromisso de substituir automaticamente todo EHR/ERP hospitalar. Seu escopo mínimo inclui identidade assistencial, vínculos, atendimentos, evoluções, planos, ordens, documentos, autoria, versionamento, integridade, permissões e trilha auditável. Funcionalidades fiscais, contábeis, folha, faturamento hospitalar ou especializadas só serão incluídas mediante escopo, ADR e validação próprios.
+
+## 28. Comunicação bidirecional e documentos clínicos
+
+Secure Care Messaging deve permitir comunicação entre paciente e profissionais autorizados, contextualizada por instituição, vínculo, programa, Encounter, CarePlan ou ocorrência quando aplicável. O chat suporta texto e anexos, com envio e recebimento, estado de entrega, notificações, histórico, busca/autorização, retenção e auditoria.
+
+Tipos de anexos previstos: imagens, PDFs e documentos permitidos pela política institucional. Arquivos clínicos devem ser classificados como ClinicalDocument, não permanecer apenas como anexo opaco da conversa. Categorias incluem prescrição, atestado, laudo, resultado, solicitação de exame, encaminhamento, orientação profissional e documento administrativo.
+
+Documentos clínicos devem preservar autoria, emissor, destinatário, data, integridade, versão, status, relação com Encounter/CarePlan e assinatura válida quando legalmente exigida. Uma nova versão não apaga nem sobrescreve silenciosamente a anterior. PDF visualmente semelhante não é, por si só, prescrição ou atestado legalmente válido.
+
+O envio e recebimento de arquivos exige armazenamento privado, autorização contextual, limites de tipo/tamanho, verificação de malware, criptografia, URLs temporárias, trilha de acesso/download e políticas de retenção. Mensagens, relatos do paciente, orientações profissionais, decisões, prescrições e confirmações devem manter semântica distinta.
+
+### Áudio como capacidade opcional governada
+
+Áudio não faz parte do padrão inicial obrigatório do chat. A arquitetura pode prever suporte futuro a mensagens de áudio, mas o recurso deve nascer desabilitado por padrão e permanecer sob feature flag administrável no Tysvora Control Center. A disponibilização depende de habilitação comercial/técnica, política institucional, consentimento/transparência quando aplicável, limites de duração/tamanho, retenção, moderação/segurança, acessibilidade e medição de custos de armazenamento, tráfego e eventual transcrição/IA.
+
+O Control Center controla disponibilidade global, elegibilidade por plano e ativação do recurso. O administrador institucional pode habilitar ou desabilitar o uso dentro da sua organização apenas quando a plataforma o disponibilizar e o contrato permitir. A desativação bloqueia novos envios, sem apagar mensagens/arquivos válidos já existentes nem eliminar obrigações de retenção. Não incluir transcrição automática no escopo básico; ela exige capacidade e custo separados.
+
+## 29. Gestão do ciclo de vida do vínculo profissional-paciente
+
+A plataforma deve distinguir identidade da pessoa, vínculo institucional, relação com profissional, inscrição em programa e permissões de comunicação. Encerrar uma relação não exclui Person, CareSubject, prontuário ou histórico.
+
+O profissional autorizado poderá:
+- silenciar notificações de uma conversa;
+- configurar preferências e janelas de comunicação quando permitido;
+- encaminhar mensagens para fila/equipe institucional;
+- solicitar ou executar encerramento de vínculo conforme sua autoridade e política institucional;
+- transferir o acompanhamento para outro profissional ou equipe;
+- consultar histórico e documentos conforme permissões e obrigações de retenção.
+
+**Silenciar** afeta notificações comuns para o profissional, não bloqueia recebimento institucional nem apaga mensagens. Alertas críticos e manifestações urgentes seguem regras de triagem/escalonamento definidas pela instituição, não podendo ser ocultados por uma preferência individual.
+
+**Limitar comunicação** deve informar ao paciente canais, horários e alternativas institucionais, mantendo rota apropriada para situações urgentes. Não deve impedir acesso a documentos, solicitações formais ou direitos do paciente.
+
+**Encerrar vínculo** exige motivo codificado e justificativa quando aplicável, autor, data/hora, escopo (profissional, equipe ou instituição), revisão/aprovação conforme política, comunicação ao paciente, orientação de continuidade/transição quando necessária e auditoria. Deve considerar tratamento em curso, risco, urgência, regras profissionais, contrato, base legal e normas de retenção. Não é mecanismo para abandono, retaliação, discriminação, supressão de registros ou evasão de responsabilidade.
+
+O encerramento de vínculo profissional não encerra automaticamente vínculo institucional, outros profissionais, outros programas ou acesso legítimo do paciente aos próprios documentos. Reentrada exige novo vínculo ou reativação formal, sem apagar histórico.
+
+## 30. Modular Commerce & Tysvora Store
+
+Tysvora terá catálogo comercial nativo, dinâmico e administrável, denominado Tysvora Store. A instituição poderá consultar plano, franquias, adicionais e serviços elegíveis, contratar, ampliar acessos, acompanhar consumo, pagamentos e alterações de assinatura. O Control Center administra catálogo, preços, disponibilidade, planos, contratos, direitos, capacidade, assinaturas, cobrança, conciliação e políticas comerciais.
+
+Planos iniciais de referência (estimativas, não preços aprovados/publicados): Start R$ 199/mês; Institution R$ 899/mês; Network R$ 3.990/mês; Public & Enterprise a partir de R$ 12.000/mês. Franquias de profissionais, administradores, unidades e capacidade serão definidas por plano. Pacientes não são cobrados individualmente. Acessos profissionais adicionais podem ser contratados; a métrica e o preço final dependem de validação econômica.
+
+Adicionais de referência: UIP Advanced R$ 699/mês; Connector Agent adicional R$ 299/mês; Field Operations R$ 899/mês; Sentinela Intelligence R$ 699/mês; Advanced Analytics R$ 499/mês; Communication Hub R$ 249/mês; AI Services em pacotes a partir de R$ 99 ou consumo medido; Premium Support/SLA R$ 699/mês. Implantação assistida, integrações personalizadas e migração/saneamento são serviços separados, quando solicitados. Valores permanecem hipóteses comerciais de planejamento.
+
+O modelo inclui Plan Catalog, Add-on Catalog, Subscription Management, Feature Entitlements, Capacity Entitlements, Provisioning Engine, Usage Metering, Billing & Invoicing, Payment Reconciliation, Contract Management, Entitlement Enforcement e Revenue Analytics. Direitos e limites são isolados por tenant/organização. Contratação gera assinatura, direito, capacidade, provisionamento e trilha auditável. Upgrade, downgrade, cancelamento, inadimplência, tolerância, renovação, reativação e excedentes têm políticas explícitas.
+
+Programas e especialidades básicas não são vendidos como softwares separados. O preço não deve penalizar cadastro histórico de pacientes nem cobrar individualmente por cada mensagem clínica. Custos variáveis (IA, OCR, mensageria, áudio opcional e processamento) devem ter franquias, limites e medição transparentes.
+
+A Tysvora Store não pode vender uma capacidade que não esteja implementada, homologada, provisionável, observável e economicamente dimensionada. A arquitetura pode prever funcionalidades futuras em estado indisponível/invernado, sem apresentá-las como prontas. Cobrança produtiva depende de provedor, reconciliação, testes financeiros, contratos, fiscalidade e aceite formal.
