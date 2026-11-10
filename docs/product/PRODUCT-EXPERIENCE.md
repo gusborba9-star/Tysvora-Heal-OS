@@ -58,3 +58,29 @@ Superadmin da plataforma não é superusuário clínico universal. Por padrão, 
 A instituição deve conseguir iniciar sem integração externa: configurar estrutura e papéis, convidar usuários, cadastrar dados manualmente e importar arquivos. Depois pode conectar API, banco, CRM/ERP, transferência segura ou Connector Agent. O fluxo Easy Connect orienta seleção da fonte, autenticação/pareamento, discovery, escolha de recursos, mapping sugerido, preview, validação, aprovação e monitoramento.
 
 O Connector Agent é instalado em máquina/servidor institucional autorizado; o navegador administra, mas não acessa arbitrariamente redes privadas. Upload deve oferecer preview, validação, quarentena, detecção de duplicidade, mapping assistido, aprovação, relatório de erros e lineage. Extração/OCR pode sugerir conteúdo, mas dados clínicos extraídos exigem validação apropriada antes de se tornarem registros ativos.
+
+
+## 12. Tysvora como sistema principal ou integrado
+
+Cada instituição escolhe um modo de operação, podendo combinar capacidades:
+- **Sistema principal:** utiliza o Clinical Record Core nativo para cadastro assistencial, atendimentos, evoluções, planos, ordens/documentos, comunicação, programas, acompanhamento e auditoria dentro do escopo contratado.
+- **Plataforma integrada:** mantém seus sistemas existentes e utiliza UIP, Unified Care Workspace, comunicação, continuidade, tarefas, programas e operações do Tysvora.
+- **Híbrido:** mantém sistemas externos para domínios específicos e utiliza capacidades nativas do Tysvora onde houver lacuna, com fonte de verdade e autoridade por atributo explícitas.
+
+Onboarding não deve exigir integração externa. Cadastro manual e importação governada são caminhos de primeira classe. A afirmação de que Tysvora substitui integralmente um EHR/ERP depende de escopo funcional, validação clínica/legal e homologação; não é promessa genérica.
+
+## 13. Chat bidirecional e documentos
+
+O chat permite que paciente e profissional autorizado enviem e recebam mensagens e anexos. A conversa deve manter contexto de instituição, vínculo e, quando aplicável, atendimento, programa, plano ou ocorrência. Deve oferecer estados de envio/entrega, notificações, histórico, permissões, limites e auditoria.
+
+Arquivos permitidos incluem imagens, PDFs e documentos. Prescrições, atestados, laudos, resultados, solicitações, encaminhamentos e orientações devem ser classificados e geridos pelo Clinical Document Management, com autoria, integridade, versão, status, assinatura válida quando exigida e vínculo contextual. Não tratar documento clínico como simples arquivo sem metadados.
+
+Áudio não integra o padrão inicial do chat. Pode existir como capacidade opcional, desabilitada por padrão, habilitável pelo Control Center e, quando liberada, sujeita a opt-in/controle do administrador institucional. Deve ter limites de tamanho/duração, políticas de retenção, segurança, acessibilidade e medição de custos. Transcrição/IA é capacidade separada e não vem incluída automaticamente. Desabilitar áudio impede novos envios, sem apagar conteúdo previamente retido conforme política.
+
+## 14. Preferências de comunicação e ciclo de vida do vínculo
+
+No perfil/contexto do paciente, o profissional autorizado pode silenciar notificações comuns, configurar preferências permitidas, encaminhar conversas à equipe e iniciar encerramento/transferência de vínculo.
+
+Silenciar não bloqueia mensagens recebidas pela instituição, não apaga histórico e não suprime alertas críticos definidos pela política institucional. O paciente deve ter canais e instruções claros para urgências e solicitações formais.
+
+Encerramento de vínculo exige motivo, autoria, escopo, data, revisão conforme política, comunicação e plano de transição quando necessário. Encerra a relação definida, não a identidade da pessoa nem seu prontuário. Não pode ser usado para abandono, retaliação ou supressão de direitos. Acesso a documentos e retenção seguem legislação, contrato e política institucional.
