@@ -38,3 +38,10 @@
 7. ADR-014 e ADR-018: IA e configuração declarativa avançada.
 
 A ordem é uma proposta de decisão documental; não autoriza implementação. ADRs podem ser reordenados se dependências forem registradas.
+
+| ADR-021 | Context Graph, projeções e reconciliação de dados | ABERTO — BLOQUEIA RECONCILIAÇÃO AUTOMÁTICA | definir grafo lógico vs projeções, autoridade por atributo, matching, correção/desfazer e limites de consulta antes de reconciliação automática |
+| ADR-022 | Workforce Management e fronteira com RH/ponto/folha | ABERTO — BLOQUEIA JORNADA PRODUTIVA | definir modelo pessoa/profissional/colaborador/vínculo, dados sensíveis, regras por jurisdição e integração com sistemas trabalhistas antes de jornada/banco de horas produtivos |
+| ADR-023 | Internacionalização, localização e tradução de conteúdo | ABERTO — BLOQUEIA CONTEÚDO MULTILÍNGUE REGULADO | definir catálogo de mensagens, idioma por usuário/instituição/paciente, versionamento, preservação do original e validação de traduções antes de documentos regulados |
+| ADR-024 | SLA, escalonamento e Central de Pendências | ABERTO — BLOQUEIA ORQUESTRAÇÃO PRODUTIVA | definir semântica de pendência, relógios/SLA, pausa, escalonamento, contingência e criticidade sem substituir governança clínica |
+| ADR-025 | Capacity Engine e recomendações de alocação | ABERTO — BLOQUEIA OTIMIZAÇÃO AUTOMÁTICA | definir restrições de competência, jornada, descanso, território, prioridade profissional, explicabilidade e aprovação humana antes de redistribuição automática |
+| ADR-026 | Copiloto operacional e ações assistidas por IA | ABERTO — BLOQUEIA IA COM DADOS REAIS | definir permissões, fontes, retenção, validação humana, trilha, avaliação, prompt injection e limites entre rascunho e ação executável |
