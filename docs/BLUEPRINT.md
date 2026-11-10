@@ -360,3 +360,92 @@ O modelo inclui Plan Catalog, Add-on Catalog, Subscription Management, Feature E
 Programas e especialidades básicas não são vendidos como softwares separados. O preço não deve penalizar cadastro histórico de pacientes nem cobrar individualmente por cada mensagem clínica. Custos variáveis (IA, OCR, mensageria, áudio opcional e processamento) devem ter franquias, limites e medição transparentes.
 
 A Tysvora Store não pode vender uma capacidade que não esteja implementada, homologada, provisionável, observável e economicamente dimensionada. A arquitetura pode prever funcionalidades futuras em estado indisponível/invernado, sem apresentá-las como prontas. Cobrança produtiva depende de provedor, reconciliação, testes financeiros, contratos, fiscalidade e aceite formal.
+
+## 31. Central de Pendências Assistenciais e Operacionais
+
+A Central de Pendências é a superfície unificada de execução para itens que exigem ação, originados por manifestações de pacientes, profissionais, programas, integrações, documentos, agenda, visitas, tarefas ou regras operacionais.
+
+Cada item deve possuir: identidade e contexto relacionado; origem e proveniência; categoria; prioridade e justificativa; responsável atual; fila/equipe; prazo/SLA; estado e transições permitidas; próxima ação; histórico de atribuições; escalonamentos; resultado e motivo de encerramento. Deve suportar atribuição, aceite, transferência, pausa justificada, reabertura, escalonamento e encerramento auditáveis.
+
+A Central não é uma caixa de notificações. Notificação informa; pendência representa trabalho que precisa de resolução. Mensagens, ocorrências clínicas, alertas e tarefas mantêm semânticas distintas, podendo originar ou atualizar uma pendência conforme política. Alertas críticos não podem ser ocultados por preferências comuns de comunicação. SLA e escalonamento são configuráveis por instituição, programa, categoria e criticidade; não substituem triagem ou prioridade clínica profissional.
+
+## 32. Grafo de Contexto, Reconciliação e Qualidade dos Dados
+
+O Tysvora deverá manter relações navegáveis e autorizadas entre Person/CareSubject, instituições, unidades, profissionais, vínculos, programas, jornadas, atendimentos, planos, ordens, prescrições, exames, documentos, manifestações, tarefas, visitas e desfechos.
+
+O grafo é uma camada lógica de contexto, não uma autorização para exposição integral de dados. Toda consulta continua sujeita a tenant, instituição, finalidade, papel, vínculo e necessidade de acesso.
+
+Reconciliação identifica divergências entre fontes e registros: medicamento, alergia, diagnóstico registrado, plano, documento, identificadores, dados cadastrais e outros atributos. Deve apresentar valores concorrentes, fonte, autoria, timestamp, confiança/qualidade e autoridade definida para o atributo. Nenhuma divergência relevante pode ser resolvida por sobrescrita silenciosa ou por escolha probabilística sem política aprovada e, quando necessário, revisão humana.
+
+Preservar Source Data, Normalized Data e Canonical Domain Data, com lineage, transformações, proveniência, correções não destrutivas, deduplicação governada e possibilidade de desfazer vínculos incorretos. O grafo e a reconciliação dependem da UIP, do modelo de identidade e dos ADRs de domínio, segurança e persistência.
+
+## 33. Sentinela — risco assistencial, continuidade e operação
+
+Sentinela deverá distinguir explicitamente:
+- **Sinais assistenciais:** manifestações ou padrões que requerem avaliação de profissional habilitado;
+- **Riscos de continuidade:** ausência de retorno, abandono potencial, acompanhamento interrompido, plano sem revisão ou contato sem resposta;
+- **Riscos operacionais:** fila, atraso, sobrecarga, tarefa sem responsável, falha de integração, unidade descoberta ou SLA vencido.
+
+Cada sinal deve explicar regra/modelo, dados utilizados, fonte, atualização, limitações, destinatário, prioridade, versão e ação esperada. Deve medir falsos positivos/negativos quando aplicável, permitir contestação/correção e registrar desfecho. Sinais assistenciais não são diagnóstico, prognóstico nem decisão terapêutica. Ação clínica exige avaliação e autoridade profissional. Alertas operacionais podem criar pendências e acionar escalonamentos conforme política.
+
+## 34. Biblioteca de Programas e Modelos Operacionais
+
+O Program Engine poderá oferecer biblioteca versionada de modelos reutilizáveis para acelerar implantação: tabagismo, diabetes, hipertensão, saúde mental/depressão, obesidade, pré-natal, reabilitação, nutrição, cuidados paliativos, saúde da criança/idoso, doenças infecciosas e outros domínios, além de modelos veterinários quando aprovados.
+
+Cada modelo poderá incluir elegibilidade, etapas, estados, formulários, instrumentos, metas, frequência, tarefas, papéis, mensagens, indicadores, critérios de conclusão e regras de encaminhamento. Instituições podem clonar/configurar modelos sem alterar a versão de origem. Conteúdo clínico, escalas, protocolos e recomendações exigem fonte, licença quando aplicável, versão, vigência, validação e aprovação por autoridade competente. A biblioteca não é um catálogo fechado nem transforma um modelo em protocolo universal.
+
+## 35. Workforce Management — gestão da equipe institucional
+
+O Tysvora deverá oferecer módulo institucional **Meus profissionais**, com visão da equipe clínica, administrativa e operacional: médicos, enfermagem, técnicos, psicólogos, nutricionistas, fisioterapeutas, veterinários, recepção, coordenação, administração, agentes comunitários, equipes de campo e outras funções.
+
+Capacidades previstas:
+- cadastro e vínculo institucional, funções, especialidades, credenciais/habilitações, unidades, equipes e status;
+- jornada prevista, carga horária, turnos, intervalos, escalas, plantões e cobertura;
+- férias, folgas, licenças, afastamentos, atestados, solicitações e aprovações;
+- registros de jornada, banco de horas, créditos, débitos, compensações e ajustes autorizados;
+- atividades, atendimentos, visitas, tarefas e atribuições;
+- conflitos de escala, indisponibilidade, substituição e redistribuição assistida;
+- indicadores de disponibilidade, cobertura, carga, ocupação, atrasos e distribuição de atividades;
+- autoatendimento do colaborador para consultar informações e solicitar férias, folgas, troca de turno, ajuste de jornada e atualização cadastral.
+
+Modelo de domínio deve separar Person, UserIdentity, Professional, WorkforceMember/StaffMember, InstitutionalEmployment/Engagement, RoleAssignment, Credential, WorkSchedule, Shift, LeaveRequest, Absence, TimeEntry, TimeBalance, ActivityRecord e CoverageRequirement. Nem todo colaborador é profissional de saúde; nem todo profissional é empregado; uma pessoa pode ter múltiplos vínculos, funções e unidades. A autorização clínica e as permissões administrativas são independentes da gestão de jornada.
+
+Dados de atestados e afastamentos exigem minimização e acesso restrito: gestores de escala recebem somente a informação necessária para cobertura; conteúdo clínico do documento não fica amplamente disponível. Registros de jornada, banco de horas e licenças devem respeitar legislação, contratos, acordos coletivos e jurisdição. O módulo não será apresentado como folha de pagamento, sistema jurídico-trabalhista ou RH completo. Integração com ponto/folha é preferível quando o escopo regulatório e contratual exigir.
+
+## 36. Capacity Engine e coordenação da força de trabalho
+
+Capacity Engine correlaciona demanda assistencial/operacional com disponibilidade, competência, habilitação, unidade, território, agenda, jornada, carga e restrições. Deve apoiar dimensionamento, detecção de gargalos, distribuição de filas, planejamento de cobertura, combinação de visitas por região e análise de modalidades remota/presencial quando clinicamente autorizadas.
+
+Pode sugerir redistribuição e cenários, mas atribuição de responsabilidade clínica, prioridade assistencial e alterações sensíveis de escala exigem aprovação humana conforme política. Segurança, competência, descanso, limites de jornada e adequação do cuidado prevalecem sobre produtividade ou receita. Não usar contagem bruta de atendimentos como ranking individual de qualidade.
+
+Indicadores possíveis: tempo para recuperar contexto; tempo até primeira resposta; tempo até resolução; pendências abertas/vencidas; carga por função/equipe/unidade; cobertura; horas disponíveis/realizadas; continuidade; visitas planejadas/concluídas; retrabalho; capacidade utilizada; custo por jornada. Economia, produtividade ou ganho de capacidade só podem ser divulgados após piloto com baseline, método, período, custos e limitações documentados.
+
+## 37. Internacionalização, localização e conteúdo multilíngue
+
+A plataforma deverá ser internacionalizável desde a fundação, iniciando por português brasileiro (pt-BR) e inglês (en), com possibilidade de variantes regionais. O idioma é uma preferência por usuário, com defaults institucionais e de organização; a preferência individual pode diferir do idioma da instituição e do idioma escolhido para comunicação com o paciente.
+
+Separar:
+- tradução de interface e mensagens de sistema;
+- conteúdo institucional;
+- conteúdo de programas, formulários e protocolos;
+- idioma de comunicação preferido por pessoa;
+- idioma original de documentos e registros;
+- tradução derivada, identificada como tradução, com autoria/origem, data, método, versão e possibilidade de revisão.
+
+Preservar sempre o conteúdo original. Tradução automática não altera o registro clínico original nem substitui documento legalmente válido. Documentos regulados, prescrições, consentimentos e orientações clínicas devem exibir idioma, versão e status; tradução não certificada deve ser claramente marcada e não apresentada como original. Localização abrange datas, horários, calendários, números, moedas, unidades, fuso horário, formatos e regras regionais. Internacionalização técnica não equivale a autorização para operar em outro país: cada jurisdição exige análise legal, regulatória, fiscal, de privacidade, terminologia e interoperabilidade.
+
+## 38. Copiloto Operacional e IA Assistiva
+
+O AI Gateway poderá disponibilizar copiloto para resumir contexto autorizado, organizar conversas em eventos estruturados, extrair dados de documentos, preparar rascunhos, localizar informação, resumir filas e sugerir tarefas administrativas. Saídas devem indicar fontes, incerteza e limites, ser revisáveis e registrar modelo/prompt/política quando necessário.
+
+IA prepara, organiza e sinaliza; profissional ou colaborador autorizado valida e executa. Não diagnostica, prescreve, altera plano, encerra ocorrência clínica ou toma decisão de alocação clínica autônoma. Dados sensíveis exigem minimização, finalidade, retenção e provedor aprovados. Avaliação de qualidade, vieses, prompt injection, segurança, fallback, custo e supervisão são gates obrigatórios.
+
+## 39. Experiência longitudinal e transparência do paciente
+
+Tysvora Patient deverá permitir, conforme autorização institucional e direitos aplicáveis, visualizar programas ativos, metas, orientações vigentes, compromissos, documentos, solicitações, pendências atribuídas ao paciente e evolução compartilhável. Deve distinguir informação registrada por profissional, informação autorrelatada e dado importado. O paciente participa da continuidade, mas não recebe responsabilidade por decisões clínicas ou pela coordenação institucional.
+
+## 40. Princípios de composição e limites de escopo
+
+As capacidades descritas nos §§31–39 reutilizam Core, UIP, Program Engine, Workflow/Task, Communication, Security, Audit, Analytics e Control Center. Não criar cadastros de identidade, notificações, tarefas, permissões, auditoria ou catálogos paralelos. Engines são fronteiras de responsabilidade, não exigência automática de microserviços.
+
+O Tysvora pode oferecer gestão operacional da força de trabalho, mas não se transforma automaticamente em ERP de RH, folha, contabilidade ou sistema jurídico-trabalhista. Deve integrar fornecedores especializados quando necessário. Toda capacidade permanece PLANEJADA até implementação, homologação e evidência documentada.
