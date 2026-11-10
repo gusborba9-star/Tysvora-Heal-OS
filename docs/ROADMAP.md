@@ -181,3 +181,125 @@ Fases e execuções históricas não serão renumeradas nem reclassificadas retr
 **Referência comercial inicial (não aprovada para publicação/cobrança):** Start R$ 199/mês; Institution R$ 899/mês; Network R$ 3.990/mês; Public & Enterprise a partir de R$ 12.000/mês. Add-ons de referência: UIP Advanced R$ 699; Connector Agent adicional R$ 299; Field Operations R$ 899; Sentinela Intelligence R$ 699; Advanced Analytics R$ 499; Communication Hub R$ 249; AI Services a partir de R$ 99 por pacote/consumo; Premium Support/SLA R$ 699. Implantação assistida, integrações especiais e migração são serviços separados. Preços e franquias exigem validação de unit economics e disposição de pagamento.
 
 **Gate:** contratação real em sandbox e testes financeiros; isolamento por tenant; rights enforcement server-side; provisionamento, cancelamento e downgrade sem inconsistência; medição reconciliada; inadimplência e reativação testadas; conciliação financeira; auditoria; testes de abuso e falha. Nenhum preço ou produto pode ser publicado/cobrado antes do aceite formal e da evidência de operação.
+
+## FASE 19 — CARE OPERATIONS CONTROL TOWER
+
+**STATUS: PLANEJADA — NÃO IMPLEMENTADA**
+**Dependências:** F3 e F5 (identidade, tenancy e autorização); F6 (workflow, eventos, comunicação e notificações); F7 (domínio e governança); F8 (Sentinela); F9 (experiências). ADR-002, ADR-005, ADR-017 e decisões de SLA/escalonamento aplicáveis.
+
+**Objetivo:** transformar manifestações, alertas, solicitações e falhas operacionais em trabalho rastreável até o desfecho.
+
+**Entregas:**
+1. Central de Pendências Assistenciais e Operacionais, distinta de caixa de mensagens/notificações;
+2. filas por instituição, unidade, equipe, programa, categoria e prioridade;
+3. atribuição, aceite, transferência, prazos/SLA, pausa justificada, escalonamento, reabertura e encerramento;
+4. vínculo com Person/CareSubject, CareRelationship, Encounter, CarePlan, documento, mensagem, integração, visita e origem;
+5. trilha de responsabilidade e histórico de transições;
+6. painéis de pendências abertas, vencidas, sem responsável, recorrentes e por tempo de resolução;
+7. políticas para alertas críticos e contingência, sem supressão por preferências comuns.
+
+**Gate:** E2E manifestação → contexto → fila → responsável → decisão/ação → resultado → encerramento; testes de duplicidade, retry, transferência, escalonamento, SLA, falha de notificação, revogação de acesso e auditoria. Pendência não equivale a decisão clínica; triagem e decisões clínicas permanecem com profissional habilitado.
+
+## FASE 20 — CONTEXT GRAPH, DATA RECONCILIATION & PROGRAM LIBRARY
+
+**STATUS: PLANEJADA — NÃO IMPLEMENTADA**
+**Dependências:** F3, F5, F6, F7 e F10; ADR-003, ADR-004, ADR-005, ADR-009, ADR-010 e ADR-011 conforme escopo.
+
+**Objetivo:** oferecer contexto longitudinal navegável, dados reconciliados e implantação acelerada por modelos governados.
+
+**Entregas:**
+- grafo lógico de relações entre pessoa/sujeito, instituição, unidade, equipe, profissional, programa, atendimento, plano, prescrição/ordem, exame, documento, manifestação, tarefa, visita e desfecho;
+- reconciliação de divergências com fonte, autoria, timestamp, qualidade, autoridade por atributo e revisão humana;
+- deduplicação, lineage, correção não destrutiva, desfazimento de vínculo e preservação dos dados originais;
+- biblioteca versionada de programas/modelos operacionais para diabetes, tabagismo, hipertensão, saúde mental, pré-natal, nutrição, reabilitação, entre outros e modelos veterinários;
+- clone/configuração institucional de modelos sem reescrever a origem;
+- formulários, etapas, tarefas, frequência, indicadores, papéis e mensagens como artefatos governados.
+
+**Gate:** E2E com fontes conflitantes, matching errado e reversão; autorização contextual no grafo; cinco ou mais modelos demonstrativos; versionamento sem reescrever inscrições históricas; validação e aprovação de conteúdo clínico, instrumentos e licenças aplicáveis. Grafo não amplia permissões de acesso.
+
+## FASE 21 — WORKFORCE MANAGEMENT & SELF-SERVICE
+
+**STATUS: PLANEJADA — NÃO IMPLEMENTADA**
+**Dependências:** F3, F4, F5, F6, F9, F12 e F13; integração com F19 e F22. ADRs de identidade, autorização, auditoria, dados e jurisdição aplicáveis.
+
+**Objetivo:** permitir que instituições administrem equipe clínica, administrativa e operacional, disponibilidade e rotina em conexão com a capacidade assistencial.
+
+**Entregas incrementais:**
+1. cadastro de equipe, funções, credenciais, vínculos, unidades e equipes;
+2. jornadas, carga horária, turnos, escalas, plantões e cobertura;
+3. férias, folgas, licenças, afastamentos, atestados, solicitações, aprovações e substituições;
+4. registros de jornada, banco de horas, compensações e ajustes autorizados;
+5. atividades, atendimentos, tarefas, visitas e atribuições;
+6. alertas de conflito, indisponibilidade, cobertura insuficiente e sobrecarga;
+7. Workforce Self-Service para consulta e solicitações do colaborador;
+8. integração com ponto/folha/RH quando necessária, sem presumir substituição desses sistemas;
+9. indicadores de cobertura, disponibilidade e distribuição de carga.
+
+**Gate:** testes multi-vínculo/multiunidade; separação entre pessoa, profissional, colaborador, vínculo e permissões; aprovação e trilha de férias/ausências; regras de jornada parametrizadas por jurisdição; proteção de dados de atestados; prevenção de conflitos de escala; cálculos reconciliados com sistema de ponto quando integrado. Não declarar conformidade trabalhista universal nem equivalência a folha de pagamento sem validação específica.
+
+## FASE 22 — INTERNATIONALIZATION & LOCALIZATION
+
+**STATUS: PLANEJADA — NÃO IMPLEMENTADA**
+**Dependências:** fundações de experiência da F9, governança de conteúdo da F7, notificações/documentos da F6/F17 e Control Center da F13. Requer inventário de strings, conteúdo e formatos regionais.
+
+**Objetivo:** tornar toda a plataforma multilíngue sem duplicar produtos nem alterar silenciosamente o significado dos dados.
+
+**Entregas:**
+- infraestrutura i18n/l10n com pt-BR inicial e inglês (en);
+- preferência individual de idioma, default institucional e idioma de comunicação por paciente;
+- tradução de todas as experiências, Control Center, mensagens, notificações, erros, formulários e conteúdo de onboarding;
+- formatos localizados de data, hora, fuso, calendário, números, moedas e unidades;
+- metadados de idioma original e traduções derivadas para conteúdo e documentos;
+- preservação do original, identificação de tradução automática/humana, versão, autoria e revisão;
+- suporte a expansão de variantes regionais e preparação por jurisdição.
+
+**Gate:** cobertura de strings sem fallback quebrado; testes de alternância de idioma em todas as experiências; conteúdo e notificações no idioma configurado; documentos originais preservados; traduções claramente identificadas; testes de timezone, formatos e acessibilidade. Internacionalização não autoriza lançamento em jurisdição sem revisão legal, regulatória, fiscal, privacidade e interoperabilidade.
+
+## FASE 23 — CAPACITY ENGINE, FIELD OPTIMIZATION & OPERATIONAL ANALYTICS
+
+**STATUS: PLANEJADA — NÃO IMPLEMENTADA**
+**Dependências:** F8, F9, F12, F19 e F21; F6/F10 para qualidade dos dados; ADR-010/011/012/013 conforme escala, offline e analytics.
+
+**Objetivo:** otimizar capacidade institucional e coordenação de trabalho remoto, presencial e de campo, sem subordinar segurança à produtividade.
+
+**Entregas:**
+- visão de demanda, capacidade disponível, competência, habilitação, jornada, carga, agenda, território e restrições;
+- identificação de gargalos, filas, unidades descobertas, concentração de visitas e capacidade ociosa;
+- simulação e recomendação de redistribuição, cobertura e agrupamento geográfico;
+- apoio a decisão de modalidade remota/presencial somente dentro de critérios profissionais e institucionais;
+- indicadores de tempo até resposta/resolução, carga, cobertura, visitas, continuidade, retrabalho, capacidade e custo;
+- baseline e método para medir impacto econômico e operacional.
+
+**Gate:** cenários E2E com ausência, sobrecarga, unidade descoberta, visita, equipe multidisciplinar e restrições de competência/jornada; explicabilidade das recomendações; aprovação humana para redistribuições sensíveis; métricas com definição, lineage, privacidade e baseline. Alegações de economia exigem piloto controlado e resultado medido.
+
+## FASE 24 — GOVERNED OPERATIONAL COPILOT & PATIENT JOURNEY
+
+**STATUS: PLANEJADA — NÃO IMPLEMENTADA**
+**Dependências:** F7, F8, F9, F11, F17, F19 e controles F5/F13; ADR-014 e governança clínica aplicáveis.
+
+**Objetivo:** reduzir trabalho administrativo e tornar a experiência do paciente mais transparente, mantendo autoridade humana e fontes verificáveis.
+
+**Entregas:**
+- copiloto para resumo de contexto autorizado, extração/classificação documental, estruturação de conversas e rascunhos para revisão;
+- resumo de filas e pendências, busca autorizada e sugestão de tarefas administrativas;
+- apresentação de fontes, limitações, incerteza, versão de modelo/política e registro de validação;
+- Patient Journey com programas, metas, orientações vigentes, compromissos, documentos e solicitações compartilháveis;
+- distinção visual entre dado profissional, importado e autorrelatado;
+- mecanismos de correção, contestação e feedback.
+
+**Gate:** avaliação por tarefa, qualidade e segurança; proteção contra prompt injection; minimização de dados; fallback; custo/latência; validação humana; ausência de ações clínicas autônomas; testes de direitos do paciente, segregação institucional e preservação de documentos originais.
+
+## Requisitos transversais — novas capacidades
+
+- Toda pendência possui responsável, prazo, origem, contexto, estado e desfecho; mensagem e notificação não são substitutos de workflow.
+- Context Graph respeita as mesmas políticas de tenancy, finalidade, vínculo e menor privilégio do Core.
+- Reconciliação nunca sobrescreve silenciosamente dados conflitantes; preserva fonte e histórico.
+- Modelos de programa são versionados, configuráveis e governados; conteúdo clínico requer aprovação.
+- Workforce Management separa pessoa, profissional, colaborador, vínculo, função e credencial; não pressupõe vínculo empregatício.
+- Dados de atestado e saúde ocupacional são restritos e minimizados; regras de jornada dependem de jurisdição e contrato.
+- Capacity Engine não substitui decisão clínica nem viola habilitação, descanso, jornada ou segurança.
+- Idioma da interface, idioma da instituição, idioma de comunicação e idioma original de documento são dimensões distintas.
+- Traduções não substituem o original nem se apresentam como documento regulado válido sem certificação e validação aplicáveis.
+- IA apoia preparação e organização; não assume decisão clínica, alocação clínica autônoma ou encerramento clínico.
+- Todas as capacidades novas permanecem planejadas até implementação, testes, homologação e evidência.
+
