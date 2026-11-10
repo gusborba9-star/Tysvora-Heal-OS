@@ -71,3 +71,35 @@ Toda execução deve referenciar os requisitos/IDs afetados e atualizar status c
 | Planos, franquias e acessos adicionais | §30 | F18 | MODULAR-COMMERCE-STORE | F18 | limites, excedentes, contagem de ativos e isolamento |
 | Add-ons e provisionamento automático | §30 | F4, F18 | MODULAR-COMMERCE-STORE; MODULE-ARCHITECTURE | F18 | contratação → entitlement → provisionamento → uso |
 | Billing, metering e reconciliação | §30 | F18 | MODULAR-COMMERCE-STORE | F18 | consumo, fatura, pagamento, reconciliação, cancelamento e inadimplência |
+
+## Requisitos adicionais — execução assistencial, dados, workforce e internacionalização
+
+| Capacidade / requisito | Blueprint | Roadmap | Especificação normativa | Fase/execução futura | Evidência exigida |
+|---|---|---|---|---|---|
+| Central de Pendências Assistenciais e Operacionais | §31 | F19 | ENGINE-CONTRACTS; WORKFLOW; FIELD-OPERATIONS | F19 | origem/contexto, responsável, SLA, transições, escalonamento e desfecho |
+| Context Graph e relações longitudinais | §32 | F20 | DOMAIN-MODEL; DATA-ARCHITECTURE; DATA-PROVENANCE | F20 | grafo autorizado, lineage, consultas contextualizadas e testes negativos |
+| Reconciliação e qualidade de dados | §14, §32 | F6, F10, F20 | DATA-PROVENANCE; UNIVERSAL-INTEGRATION | F20 | conflito explícito, autoridade por atributo, revisão e correção não destrutiva |
+| Sentinela por risco assistencial/continuidade/operação | §16, §33 | F8, F19 | AI-ARCHITECTURE; CLINICAL-GOVERNANCE | F8/F19 | explicabilidade, origem, avaliação de falso positivo e ação humana |
+| Biblioteca de programas e modelos governados | §10, §34 | F7, F20 | PROGRAM-ENGINE; CLINICAL-GOVERNANCE | F20 | versão, vigência, aprovação, clone institucional e preservação histórica |
+| Workforce Management / Meus profissionais | §35 | F21 | DOMAIN-MODEL; SECURITY; PRODUCT-EXPERIENCE | F21 | multi-vínculo, funções, credenciais, isolamento e trilha |
+| Escalas, jornadas, férias e ausências | §35 | F21 | WORKFORCE-MANAGEMENT (a especificar) | F21 | aprovação, conflito, regras por jurisdição e acesso mínimo |
+| Banco de horas e registros de jornada | §35 | F21 | WORKFORCE-MANAGEMENT (a especificar) | F21 | reconciliação, origem, ajustes autorizados e validação legal |
+| Workforce Self-Service | §35 | F21 | PRODUCT-EXPERIENCE; WORKFORCE-MANAGEMENT | F21 | solicitações, aprovação, histórico e autorização |
+| Capacity Engine integrado à força de trabalho | §17, §36 | F12, F21, F23 | CAPACITY-OPTIMIZATION; WORKFORCE-MANAGEMENT | F23 | capacidade, competência, jornada, cobertura e aprovação humana |
+| Indicadores operacionais e impacto econômico medido | §17, §36 | F12, F23 | CAPACITY-OPTIMIZATION; DATA-ARCHITECTURE | F23 | definição, baseline, lineage, método e piloto medido |
+| Internacionalização pt-BR/en e localização | §37 | F22 | I18N-LOCALIZATION (a especificar) | F22 | cobertura de interface, formatos, timezone e alternância por usuário |
+| Conteúdo/documentos multilíngues preservando original | §37 | F22 | I18N-LOCALIZATION; CLINICAL-GOVERNANCE | F22 | original preservado, tradução identificada, versão e revisão |
+| Copiloto operacional governado | §38 | F11, F24 | AI-ARCHITECTURE; AI-GOVERNANCE | F24 | avaliação, fontes, fallback, revisão humana e ausência de ação clínica autônoma |
+| Jornada e transparência do paciente | §39 | F9, F24 | PRODUCT-EXPERIENCE; SECURITY | F24 | direitos, autorização, fonte do dado e segregação multi-instituição |
+
+## Cenários E2E adicionais
+
+| ID | Cenário | Especificações principais | Gate de homologação |
+|---|---|---|---|
+| E2E-09 | Manifestação do paciente até encerramento de pendência | CARE-CONTINUITY; WORKFLOW; SECURITY | contexto correto, fila, responsável, SLA, ação, resultado e auditoria |
+| E2E-10 | Conflito de medicamento/documento entre fontes | DATA-PROVENANCE; UNIVERSAL-INTEGRATION; CLINICAL-GOVERNANCE | fontes concorrentes visíveis, autoridade por atributo e revisão sem sobrescrita |
+| E2E-11 | Programa clonado e personalizado por instituição | PROGRAM-ENGINE; CLINICAL-GOVERNANCE | versão de origem preservada, configuração própria e aprovação |
+| E2E-12 | Profissional com múltiplos vínculos e unidades | DOMAIN-MODEL; SECURITY; WORKFORCE-MANAGEMENT | identidade única, vínculos segregados, função e permissões por contexto |
+| E2E-13 | Afastamento e redistribuição de escala | WORKFORCE-MANAGEMENT; CAPACITY-OPTIMIZATION; WORKFLOW | dados sensíveis minimizados, cobertura válida, aprovação e auditoria |
+| E2E-14 | Alternância pt-BR/en com documento clínico original | I18N-LOCALIZATION; CLINICAL-GOVERNANCE | interface traduzida, documento original intacto e tradução identificada |
+| E2E-15 | Copiloto prepara resumo e profissional valida | AI-ARCHITECTURE; SECURITY; CLINICAL-GOVERNANCE | fontes, limites, revisão humana e nenhuma mutação clínica autônoma |
