@@ -34,6 +34,7 @@ export interface RecordFactCommand {
   readonly reference?: string; readonly dueAt?: string; readonly source: string;
 }
 export interface PendencyActionCommand { readonly pendencyId: EntityId; readonly action: PendencyAction; readonly assigneeUserId?: EntityId; readonly reason?: string; }
+export interface SweepResult { readonly evaluated: number; readonly created: number; readonly failed: number; readonly remaining: number; }
 export interface EvaluationResult { readonly assessment: ContinuityAssessment; readonly pendency: Pendency | null; readonly created: boolean; }
 
 /** Program Engine + Sentinela + Central de Pendências, all tenant- and organization-scoped. */
@@ -114,7 +115,20 @@ export class ProgramApplication {
     const enrollment = await this.activeEnrollment(context, "fact.record", command.enrollmentId);
     const fact = createProgramFact({ id: this.d.ids.next(), tenantId, enrollmentId: enrollment.id, kind: command.kind, occurredAt: command.occurredAt, reference: command.reference, dueAt: command.dueAt, source: command.source }, this.d.clock.now());
     await this.k.commit(context, tenantId, { save: () => this.d.facts.save(fact), action: "fact.recorded", resource: "fact", resourceId: fact.id, eventType: "fact.recorded", payload: { factId: fact.id, kind: fact.kind, enrollmentId: enrollment.id } });
+    await this.evaluateAfterFact(context, enrollment);
     return fact;
+  }
+
+  /**
+   * Sentinela trigger: a new fact re-evaluates its enrollment. This is best effort by design: the fact is already committed, so an
+   * evaluation problem (module off for the plan, transient failure) must never make the caller retry and duplicate the fact.
+   * The daily sweep is the safety net that catches anything missed here.
+   */
+  private async evaluateAfterFact(context: ApplicationContext, enrollment: ProgramEnrollment): Promise<void> {
+    try {
+      await this.d.entitlements.requireFeature(enrollment.tenantId, "sentinela");
+      await this.assess(context, enrollment.tenantId, enrollment.organizationId, enrollment);
+    } catch { /* see above */ }
   }
 
   // ----- Sentinela: continuity evaluation that may open a pendency -----
@@ -125,6 +139,10 @@ export class ProgramApplication {
     await this.k.authorize(context, "sentinela.evaluate", "enrollment", enrollmentId);
     await this.d.entitlements.requireFeature(tenantId, "sentinela");
     const enrollment = await this.activeEnrollment(context, "sentinela.evaluate", enrollmentId);
+    return this.assess(context, tenantId, organizationId, enrollment);
+  }
+
+  private async assess(context: ApplicationContext, tenantId: EntityId, organizationId: EntityId, enrollment: ProgramEnrollment): Promise<EvaluationResult> {
     const def = await this.d.definitions.getInTenant(tenantId, enrollment.definitionId);
     if (!def) throw new NotFoundError("program", enrollment.definitionId);
     const facts = (await this.d.facts.listInTenant(tenantId)).filter(f => f.enrollmentId === enrollment.id);
@@ -150,6 +168,25 @@ export class ProgramApplication {
       skipIf: async () => (await findOpen()) !== undefined
     });
     return created ? { assessment, pendency, created: true } : { assessment, pendency: (await findOpen()) ?? null, created: false };
+  }
+
+  /**
+   * Daily sweep (run by a scheduler under a technical-operator identity): re-evaluates every active enrollment of the acting
+   * organization, because time passing is itself a signal (an exam becomes overdue without any new fact). Idempotent; one failing
+   * enrollment never stops the others; bounded per run so cost stays predictable.
+   */
+  async sweepContinuity(context: ApplicationContext, options: { maxEnrollments?: number } = {}): Promise<SweepResult> {
+    const { tenantId, organizationId } = this.scope(context);
+    await this.k.authorize(context, "sentinela.evaluate", "enrollment");
+    await this.d.entitlements.requireFeature(tenantId, "sentinela");
+    const limit = Math.min(Math.max(Math.trunc(options.maxEnrollments ?? 500), 1), 5000);
+    const active = (await this.d.enrollments.listInTenant(tenantId)).filter(e => e.organizationId === organizationId && e.status === "active");
+    const batch = active.slice(0, limit);
+    let created = 0, failed = 0;
+    for (const enrollment of batch) {
+      try { if ((await this.assess(context, tenantId, organizationId, enrollment)).created) created++; } catch { failed++; }
+    }
+    return { evaluated: batch.length - failed, created, failed, remaining: active.length - batch.length };
   }
 
   // ----- Central de Pendências -----

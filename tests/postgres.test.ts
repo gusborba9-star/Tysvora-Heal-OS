@@ -74,8 +74,10 @@ test("postgres: full care flow persists and is consistent (state, audit, events)
   assert.equal(approved.status, "approved");
   const enrollment = await w.programs.enroll(octx, { subjectId: subject.id, programKey: "diabetes" });
   await w.programs.recordFact(octx, { enrollmentId: enrollment.id, kind: "appointment.missed", occurredAt: new Date(Date.now() - 86400_000).toISOString(), source: "test" });
+  // The fact itself triggered Sentinela: the pendency already exists, so explicit evaluations only find it.
   const first = await w.programs.evaluateContinuity(octx, enrollment.id);
-  assert.equal(first.created, true);
+  assert.equal(first.created, false);
+  assert.equal((await w.programs.listPendencies(octx)).length, 1);
   // Evaluating concurrently never duplicates the pendency (application check inside the tenant lock + partial unique index).
   const rest = await Promise.all(Array.from({ length: 8 }, () => w.programs.evaluateContinuity(octx, enrollment.id)));
   assert.ok(rest.every(r => r.created === false));

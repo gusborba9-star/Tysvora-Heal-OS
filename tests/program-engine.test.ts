@@ -85,9 +85,10 @@ test("diabetes end to end: missed visits + overdue exam + unanswered demand open
   await w.app.recordFact(w.nurseCtx, { enrollmentId: enrollment.id, kind: "exam.due", occurredAt: daysAgo(60), dueAt: daysAgo(30), reference: "hba1c", source: "plan" });
   await w.app.recordFact(w.nurseCtx, { enrollmentId: enrollment.id, kind: "demand.opened", occurredAt: daysAgo(3), reference: "d1", source: "patient-app" });
 
+  // Sentinela already evaluated when the facts arrived: the pendency opened as soon as two signals existed (missed visits + overdue exam).
   const first = await w.app.evaluateContinuity(w.nurseCtx, enrollment.id);
-  assert.equal(first.created, true);
-  assert.equal(first.assessment.signals.length, 3);
+  assert.equal(first.created, false);
+  assert.equal(first.assessment.signals.length, 3, "the explicit evaluation sees the late demand signal too");
   assert.equal(first.assessment.ruleSetVersion, "diabetes@v1");
   const p = first.pendency!;
   assert.equal(p.priority, "high");
@@ -95,7 +96,7 @@ test("diabetes end to end: missed visits + overdue exam + unanswered demand open
   assert.equal(p.state, "open");
   assert.equal(p.dueAt, new Date(Date.parse(NOW) + 48 * 3600_000).toISOString());
   assert.equal(p.origin.source, "sentinela");
-  assert.equal(p.origin.evidenceFactIds.length, 4);
+  assert.equal(p.origin.evidenceFactIds.length, 3, "evidence is frozen at the moment the pendency opened");
   assert.match(p.origin.explanation, /not a clinical assessment/);
 
   const second = await w.app.evaluateContinuity(w.nurseCtx, enrollment.id);
@@ -170,7 +171,7 @@ test("the same engine runs a different program (veterinary vaccine return) by co
   const e = await w.app.enroll(w.nurseCtx, { subjectId: w.subject.id, programKey: "vacina-retorno" });
   await w.app.recordFact(w.nurseCtx, { enrollmentId: e.id, kind: "exam.due", occurredAt: daysAgo(60), dueAt: daysAgo(30), reference: "antirrabica", source: "carteira" });
   const r = await w.app.evaluateContinuity(w.nurseCtx, e.id);
-  assert.equal(r.created, true);
+  assert.equal(r.created, false, "the fact already opened it");
   assert.equal(r.pendency!.queue, "reception");
   assert.equal(r.pendency!.priority, "normal");
 });
