@@ -18,3 +18,6 @@ export * from "./program/domain.js";
 export * from "./program/pendency.js";
 export * from "./program/sentinela.js";
 export * from "./program/application.js";
+export * from "./core/domain/permissions.js";
+export * from "./core/application/rbac.js";
+export * from "./core/application/entitlements.js";

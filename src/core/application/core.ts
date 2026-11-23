@@ -1,6 +1,7 @@
 import { EntityId } from "../../shared/ids.js";
 import { ApplicationContext, ApplicationError, AuthorizationError, AuthorizationService, NotFoundError } from "./shared.js";
 import { ApplicationKernel } from "./kernel.js";
+import { EntitlementGate } from "./entitlements.js";
 export * from "./shared.js";
 import { Tenant, Organization, Unit, User, Professional, Subject, createTenant, createOrganization, createUnit, createUser, createProfessional, createSubject } from "../domain/entities.js";
 import { Role, UserRole, createRole, createUserRole } from "../domain/access.js";
@@ -24,6 +25,7 @@ export interface CoreApplicationDependencies {
   readonly clock: Clock;
   readonly identities: IdentityProvider;
   readonly unitOfWork: UnitOfWork;
+  readonly entitlements: EntitlementGate;
   readonly authorization: AuthorizationService;
   readonly audit: AuditSink;
   readonly events: EventPublisher;
@@ -69,7 +71,7 @@ export class HealCoreApplication {
     const tenant = await this.d.tenants.getById(command.tenantId);
     if (!tenant) throw new NotFoundError("tenant", command.tenantId);
     const entity = createOrganization({ id: this.d.ids.next(), tenantId: command.tenantId, name: command.name }, tenant);
-    await this.k.commit(context, tenantId, { save: () => this.d.organizations.save(entity), action: "organization.created", resource: "organization", resourceId: entity.id, eventType: "organization.created", payload: { organizationId: entity.id } });
+    await this.k.commit(context, tenantId, { precondition: async () => this.d.entitlements.assertCanAdd(tenantId, "organizations", await this.d.organizations.countInTenant(tenantId)), save: () => this.d.organizations.save(entity), action: "organization.created", resource: "organization", resourceId: entity.id, eventType: "organization.created", payload: { organizationId: entity.id } });
     return entity;
   }
 
@@ -80,7 +82,7 @@ export class HealCoreApplication {
     const organization = await this.d.organizations.getInTenant(tenantId, command.organizationId);
     if (!organization) throw new NotFoundError("organization", command.organizationId);
     const entity = createUnit({ id: this.d.ids.next(), tenantId: command.tenantId, organizationId: command.organizationId, name: command.name }, organization);
-    await this.k.commit(context, tenantId, { save: () => this.d.units.save(entity), action: "unit.created", resource: "unit", resourceId: entity.id, eventType: "unit.created", payload: { unitId: entity.id } });
+    await this.k.commit(context, tenantId, { precondition: async () => this.d.entitlements.assertCanAdd(tenantId, "units", await this.d.units.countInTenant(tenantId)), save: () => this.d.units.save(entity), action: "unit.created", resource: "unit", resourceId: entity.id, eventType: "unit.created", payload: { unitId: entity.id } });
     return entity;
   }
 
@@ -106,7 +108,7 @@ export class HealCoreApplication {
     if (!user) throw new NotFoundError("user", command.userId);
     if (!organization) throw new NotFoundError("organization", command.organizationId);
     const entity = createProfessional({ id: this.d.ids.next(), tenantId, userId: command.userId, organizationId: command.organizationId }, user, organization);
-    await this.k.commit(context, tenantId, { save: () => this.d.professionals.save(entity), action: "professional.created", resource: "professional", resourceId: entity.id, eventType: "professional.created", payload: { professionalId: entity.id } });
+    await this.k.commit(context, tenantId, { precondition: async () => this.d.entitlements.assertCanAdd(tenantId, "professionals", await this.d.professionals.countInTenant(tenantId)), save: () => this.d.professionals.save(entity), action: "professional.created", resource: "professional", resourceId: entity.id, eventType: "professional.created", payload: { professionalId: entity.id } });
     return entity;
   }
 
@@ -117,7 +119,7 @@ export class HealCoreApplication {
     const organization = await this.d.organizations.getInTenant(tenantId, command.organizationId);
     if (!organization) throw new NotFoundError("organization", command.organizationId);
     const entity = createSubject({ id: this.d.ids.next(), tenantId, organizationId: command.organizationId, displayName: command.displayName }, organization);
-    await this.k.commit(context, tenantId, { save: () => this.d.subjects.save(entity), action: "subject.created", resource: "subject", resourceId: entity.id, eventType: "subject.created", payload: { subjectId: entity.id } });
+    await this.k.commit(context, tenantId, { precondition: async () => this.d.entitlements.assertCanAdd(tenantId, "subjects", await this.d.subjects.countInTenant(tenantId)), save: () => this.d.subjects.save(entity), action: "subject.created", resource: "subject", resourceId: entity.id, eventType: "subject.created", payload: { subjectId: entity.id } });
     return entity;
   }
 
@@ -128,7 +130,7 @@ export class HealCoreApplication {
     }
     await this.k.authorize(context, "role.create", "role", undefined, { architecturalRole: command.architecturalRole });
     const auditTenant = this.k.auditTenantId(context);
-    const entity = createRole({ id: this.d.ids.next(), name: command.name, architecturalRole: command.architecturalRole });
+    const entity = createRole({ id: this.d.ids.next(), name: command.name, architecturalRole: command.architecturalRole, tenantId: context.scope === "tenant" ? context.tenantId : undefined });
     await this.k.commit(context, auditTenant, { save: () => this.d.roles.save(entity), action: "role.created", resource: "role", resourceId: entity.id, eventType: "role.created", payload: { roleId: entity.id } });
     return entity;
   }
@@ -143,7 +145,10 @@ export class HealCoreApplication {
   async assignRole(context: ApplicationContext, command: AssignRoleCommand): Promise<UserRole> {
     const scope = command.scope;
     const role = await this.d.roles.getById(command.roleId);
-    if (!role) throw new NotFoundError("role", command.roleId);
+    // A role owned by another tenant is indistinguishable from a missing one; a tenant-owned role cannot be granted platform-wide.
+    if (!role || (role.tenantId !== undefined && (scope.level === "platform" || context.scope !== "tenant" || role.tenantId !== context.tenantId))) {
+      throw new NotFoundError("role", command.roleId);
+    }
     const privilegedRole = role.architecturalRole !== undefined && PRIVILEGED_ARCHITECTURAL_ROLES.has(role.architecturalRole);
     const attributes = { roleId: command.roleId, targetUserId: command.userId, scope, architecturalRole: role.architecturalRole };
 

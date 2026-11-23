@@ -4,7 +4,7 @@ import {
   HealCoreApplication, ProgramApplication, platformContext, tenantContext, SequenceIdGenerator, FixedClock,
   InMemoryAuditSink, InMemoryEventPublisher, InMemoryRepository, InMemoryUserRoleRepository, InMemoryIdentityProvider,
   InMemoryUnitOfWork, AuthorizationError, DomainInvariantError, NotFoundError, AuthorizationService, AuthorizationRequest,
-  AuditSink, assessContinuity, ContinuityRule, ContinuityPolicy, ProgramDefinition, ProgramEnrollment, ProgramFact, ApplicationContext, Pendency
+  AuditSink, assessContinuity, ContinuityRule, ContinuityPolicy, ProgramDefinition, ProgramEnrollment, ProgramFact, ApplicationContext, Pendency, UnlimitedEntitlementsForTestsOnly
 } from "../src/index.js";
 
 const NOW = "2026-11-23T12:00:00.000Z";
@@ -45,7 +45,7 @@ async function world(opts: { failAuditOn?: (action: string) => boolean } = {}) {
   const ids = new SequenceIdGenerator("w");
   const clock = new FixedClock(NOW);
   const unitOfWork = new InMemoryUnitOfWork([audit, events, ...Object.values(core), ...Object.values(prog)]);
-  const base = { ids, clock, authorization: policy, audit, events, unitOfWork };
+  const base = { ids, clock, authorization: policy, audit, events, unitOfWork, entitlements: new UnlimitedEntitlementsForTestsOnly() };
   const coreApp = new HealCoreApplication({ ...base, identities, ...core });
   const app = new ProgramApplication({ ...base, ...prog, subjects: core.subjects, users: core.users });
 
@@ -255,7 +255,7 @@ test("central lists open pendencies most urgent first, overdue flagged, and only
   assert.equal((await w.app.listPendencies(w.nurseCtx, { queue: "other" })).length, 0);
   assert.equal((await w.app.listPendencies(w.ctx(w.nurse.id, w.orgA2.id))).length, 0, "another organization of the same tenant sees nothing");
   const lateClock = new FixedClock("2026-11-30T12:00:00.000Z");
-  const lateApp = new ProgramApplication({ ids: new SequenceIdGenerator("late"), clock: lateClock, authorization: w.policy, audit: w.audit, events: w.events, unitOfWork: new InMemoryUnitOfWork([]), ...w.prog, subjects: w.core.subjects, users: w.core.users });
+  const lateApp = new ProgramApplication({ ids: new SequenceIdGenerator("late"), clock: lateClock, authorization: w.policy, audit: w.audit, events: w.events, unitOfWork: new InMemoryUnitOfWork([]), entitlements: new UnlimitedEntitlementsForTestsOnly(), ...w.prog, subjects: w.core.subjects, users: w.core.users });
   assert.equal((await lateApp.listPendencies(w.nurseCtx))[0].overdue, true);
 });
 

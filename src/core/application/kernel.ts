@@ -78,10 +78,12 @@ export class ApplicationKernel {
   /**
    * Saves, audits and publishes inside one unit of work: a failure in any step leaves no trace of the others.
    * `skipIf` runs inside the same serialized unit, so check-then-write decisions (e.g. de-duplication) are race-free.
+   * `precondition` also runs inside it and may throw (e.g. plan limits), so limits cannot be raced past.
    * Returns false when the write was skipped.
    */
-  async commit(context: ApplicationContext, tenantId: EntityId, spec: { save: () => Promise<void>; action: string; resource: string; resourceId: EntityId; eventType: string; payload: unknown; skipIf?: () => Promise<boolean> }): Promise<boolean> {
+  async commit(context: ApplicationContext, tenantId: EntityId, spec: { save: () => Promise<void>; action: string; resource: string; resourceId: EntityId; eventType: string; payload: unknown; skipIf?: () => Promise<boolean>; precondition?: () => Promise<void> }): Promise<boolean> {
     return this.d.unitOfWork.run(async () => {
+      if (spec.precondition) await spec.precondition();
       if (spec.skipIf && await spec.skipIf()) return false;
       await spec.save();
       await this.audit(context, tenantId, spec.action, spec.resource, spec.resourceId);

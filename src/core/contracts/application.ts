@@ -11,7 +11,7 @@ export interface UserRepository extends TenantScopedRepository<User> {}
 export interface ProfessionalRepository extends TenantScopedRepository<Professional> {}
 export interface SubjectRepository extends TenantScopedRepository<Subject> {}
 export interface RoleRepository extends Repository<Role> {}
-export interface UserRoleRepository extends Repository<UserRole> {}
+export interface UserRoleRepository extends Repository<UserRole> { listForUser(userId: string): Promise<readonly UserRole[]>; }
 
 export interface AuditSink { append(entry: AuditEntry): Promise<void>; }
 export interface IdGenerator { next(): EntityId; }

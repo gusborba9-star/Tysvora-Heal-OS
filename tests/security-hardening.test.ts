@@ -4,7 +4,7 @@ import {
   HealCoreApplication, platformContext, tenantContext, SequenceIdGenerator, FixedClock,
   InMemoryAuditSink, InMemoryEventPublisher, InMemoryRepository, InMemoryUserRoleRepository, InMemoryIdentityProvider,
   InMemoryUnitOfWork, AuthorizationError, DomainInvariantError, NotFoundError, ValidationError,
-  AuthorizationService, AuthorizationRequest, AuditSink, requireId, requireName, createTenant
+  AuthorizationService, AuthorizationRequest, AuditSink, requireId, requireName, createTenant, UnlimitedEntitlementsForTestsOnly
 } from "../src/index.js";
 
 class Policy implements AuthorizationService {
@@ -37,7 +37,7 @@ function world(options: { failAuditOn?: (action: string) => boolean } = {}) {
   for (const id of ["identity-a", "identity-b", "identity-c"]) identities.register({ id, subject: "s-" + id });
   const app = new HealCoreApplication({
     ids: new SequenceIdGenerator("t"), clock: new FixedClock("2026-11-23T00:00:00.000Z"),
-    authorization: policy, audit, events, identities,
+    authorization: policy, audit, events, identities, entitlements: new UnlimitedEntitlementsForTestsOnly(),
     unitOfWork: new InMemoryUnitOfWork([audit, events, ...Object.values(repos)]), ...repos
   });
   return { app, policy, repos, audit, events };

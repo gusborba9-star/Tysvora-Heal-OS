@@ -3,7 +3,8 @@ import { DomainInvariantError } from "./errors.js";
 import { Organization, Unit, User } from "./entities.js";
 
 export type ArchitecturalRole = "platform-admin"|"tenant-admin"|"municipal-management"|"unit-management"|"professional"|"patient-user"|"technical-operator";
-export interface Role { readonly id: EntityId; readonly name: string; readonly architecturalRole?: ArchitecturalRole; }
+/** `tenantId` absent = platform catalog role (curated by the platform); present = owned by, and usable only in, that tenant. */
+export interface Role { readonly id: EntityId; readonly name: string; readonly architecturalRole?: ArchitecturalRole; readonly tenantId?: EntityId; }
 export interface Permission { readonly id: EntityId; readonly code: string; }
 export interface RolePermission { readonly roleId: EntityId; readonly permissionId: EntityId; }
 export type RoleAssignmentScope =
@@ -14,7 +15,7 @@ export type RoleAssignmentScope =
 export interface UserRole { readonly userId:EntityId; readonly roleId:EntityId; readonly scope:RoleAssignmentScope; }
 
 export function createRole(input:Role):Role {
-  return { id:requireId(input.id,"role.id"), name:requireName(input.name,"role.name"), architecturalRole:input.architecturalRole };
+  return { id:requireId(input.id,"role.id"), name:requireName(input.name,"role.name"), architecturalRole:input.architecturalRole, tenantId:input.tenantId?requireId(input.tenantId,"role.tenantId"):undefined };
 }
 export function createPermission(input:Permission):Permission {
   return { id:requireId(input.id,"permission.id"), code:requireNonEmpty(input.code,"permission.code") };

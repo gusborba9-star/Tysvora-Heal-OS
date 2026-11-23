@@ -12,6 +12,7 @@ export class InMemoryRepository<T extends { readonly id: EntityId }> implements 
     const item = this.items.get(id);
     return item && (item as { tenantId?: string }).tenantId === tenantId ? item : null;
   }
+  async countInTenant(tenantId: string): Promise<number> { return (await this.listInTenant(tenantId)).length; }
   async listInTenant(tenantId: string): Promise<T[]> {
     return [...this.items.values()].filter(item => (item as { tenantId?: string }).tenantId === tenantId);
   }
