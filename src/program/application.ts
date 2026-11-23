@@ -120,6 +120,23 @@ export class ProgramApplication {
   }
 
   /**
+   * Records a demand fact on behalf of the intake module. The CALLER must already have authorized the action; this method does
+   * not (it is not an entry point for people), and it only accepts demand facts.
+   * @internal
+   */
+  async recordFactForIntake(context: ApplicationContext, command: { enrollmentId: EntityId; kind: "demand.opened" | "demand.answered"; occurredAt: string; reference: string; source: string }): Promise<ProgramFact> {
+    const { tenantId } = this.scope(context);
+    const enrollment = await this.activeEnrollment(context, "fact.record", command.enrollmentId);
+    const fact = createProgramFact({ id: this.d.ids.next(), tenantId, enrollmentId: enrollment.id, kind: command.kind, occurredAt: command.occurredAt, reference: command.reference, source: command.source }, this.d.clock.now());
+    // Idempotent per (enrollment, kind, reference), decided inside the unit of work so concurrent redeliveries cannot both write.
+    const findSame = async () => (await this.d.facts.listInTenant(tenantId)).find(f => f.enrollmentId === enrollment.id && f.kind === fact.kind && f.reference === fact.reference);
+    const created = await this.k.commit(context, tenantId, { save: () => this.d.facts.save(fact), action: "fact.recorded", resource: "fact", resourceId: fact.id, eventType: "fact.recorded", payload: { factId: fact.id, kind: fact.kind, enrollmentId: enrollment.id }, skipIf: async () => (await findSame()) !== undefined });
+    if (!created) return (await findSame())!;
+    await this.evaluateAfterFact(context, enrollment);
+    return fact;
+  }
+
+  /**
    * Sentinela trigger: a new fact re-evaluates its enrollment. This is best effort by design: the fact is already committed, so an
    * evaluation problem (module off for the plan, transient failure) must never make the caller retry and duplicate the fact.
    * The daily sweep is the safety net that catches anything missed here.

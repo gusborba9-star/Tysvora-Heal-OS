@@ -47,7 +47,17 @@ Tests were mutation-checked: removing each guard below makes at least one test f
 - A recorded fact re-evaluates its enrollment (best effort: the fact is already committed, so an evaluation problem never makes the caller retry and duplicate it; the recorder needs no `sentinela.evaluate` permission and no denied-audit noise is produced).
 - `sweepContinuity` (daily, under a technical-operator identity): re-evaluates active enrollments of the acting organization because time itself is a signal (an exam turns overdue with no new fact). Idempotent, bounded per run (default 500, max 5000), one failing enrollment never stops the rest, gated by permission and plan feature.
 - Known limitation: an open pendency keeps the evidence it had when it opened (dedup); later signals are visible in a fresh evaluation but are not appended to the pendency history yet.
-- Deliberately NOT built yet: WhatsApp/patient demand intake. The Roadmap makes ConsentRecord/purpose limitation (Fase 5) and the communication ADRs prerequisites for real contact data, and it needs a WhatsApp provider account (business verification). Next slice: ConsentRecord + contact binding + idempotent inbound handler behind a provider-agnostic channel port, then the provider adapter.
+- Next: see "Consent, contacts and demand intake" below.
+
+## Consent, contacts and demand intake (Etapa 5, slice 2)
+- `ConsentRecord` (purpose + channel + legal basis + evidence; immutable history, one granted per person/channel/purpose enforced by a unique index; revocation is immediate; `canContact` is the outbound gate). Legal basis is recorded as given: which basis applies is a decision for the institution and counsel.
+- `ContactBinding`: verified link person <-> address; Brazilian mobiles match with or without the ninth digit. Unverified or shared numbers never route a message to a record.
+- Inbound (`IntakeApplication.receiveWebhook/receive`): HMAC-SHA256 over the raw body (constant time, strict header, empty secret never validates) -> connection resolved by the institution's own account -> stored once (unique per tenant/channel/provider id; 12 simultaneous redeliveries store one demand and one fact) -> linked only when exactly one verified binding matches, otherwise kept for human triage. Inbound is metered but never refused by a quota. Text is cleaned and bounded and stored as data.
+- Demand facts (`demand.opened`/`demand.answered`) feed Sentinela's unanswered-demand rule; answering clears it. Both writes are idempotent and a retry completes a half-finished attempt.
+- The integration identity is a tenant-scoped `integration-service` role (only `demand.receive`), provisioned by the platform; the connection's service user must belong to the connection's tenant (checked in code and by a composite foreign key).
+- `WhatsAppCloudProvider` is written from Meta's documented payload and NOT validated against live traffic (needs an approved app / Tech Provider). Policy note: WhatsApp's business policy restricts health information, so the channel is designed for contact and notices, with clinical content kept inside the platform.
+- Not built: outbound sending, templates, the secret store behind `secretRef`, verification of account ownership during Embedded Signup, retention/encryption of message text (LGPD), the outbox relay.
+- Migrations 0006-0007 live on the Tysvora project; 85 tests (15 against Postgres); mutation-checked in code and in the database.
 
 ## Open decisions (need the owner)
 

@@ -6,7 +6,7 @@ import {
   HealCoreApplication, ProgramApplication, platformContext, tenantContext, RandomIdGenerator, SystemClock, InMemoryIdentityProvider,
   PostgresDatabase, PostgresUnitOfWork, PgTenantsRepository, PgOrganizationRepository, PgUnitRepository, PgUserRepository, PgProfessionalRepository,
   PgSubjectRepository, PgRoleRepository, PgUserRoleRepository, PgAuditSink, PgEventPublisher, PgProgramDefinitionRepository, PgProgramEnrollmentRepository,
-  PgProgramFactRepository, PgPendencyRepository, PgEntitlementSource, PgUsageMeter, RbacAuthorizationService, EntitlementService, EntitlementError, UsageService,
+  PgProgramFactRepository, PgPendencyRepository, PgConsentRepository, PgContactBindingRepository, PgDemandRepository, PgChannelConnectionRepository, IntakeApplication, WhatsAppCloudProvider, PgEntitlementSource, PgUsageMeter, RbacAuthorizationService, EntitlementService, EntitlementError, UsageService,
   PlanDefinition, EventPublisher, ContinuityRule, ContinuityPolicy
 } from "../src/index.js";
 
@@ -33,11 +33,15 @@ function build(opts: { events?: (real: PgEventPublisher) => EventPublisher } = {
   const identities = new InMemoryIdentityProvider();
   const events = opts.events ? opts.events(realEvents) : realEvents;
   const base = { ids: new RandomIdGenerator(), clock, authorization, audit, events, unitOfWork, entitlements };
+  const care = { consents: new PgConsentRepository(db), bindings: new PgContactBindingRepository(db), demands: new PgDemandRepository(db) };
+  const connections = new PgChannelConnectionRepository(db);
+  const usage = new UsageService({ entitlements, meter, unitOfWork, clock });
+  const programs = new ProgramApplication({ ...base, ...prog, subjects: repos.subjects, users: repos.users });
   return {
-    db, repos, prog, audit, realEvents, meter, source, identities,
+    db, repos, prog, care, connections, audit, realEvents, meter, source, identities,
+    intake: new IntakeApplication({ ...base, ...care, facts: prog.facts, enrollments: prog.enrollments, subjects: repos.subjects, users: repos.users, connections, programs, usage }),
     core: new HealCoreApplication({ ...base, identities, ...repos }),
-    programs: new ProgramApplication({ ...base, ...prog, subjects: repos.subjects, users: repos.users }),
-    usage: new UsageService({ entitlements, meter, unitOfWork, clock })
+    programs, usage
   };
 }
 type W = ReturnType<typeof build>;
@@ -195,4 +199,90 @@ test("postgres: audit rows for refusals persist even though the operation rolls 
   await assert.rejects(() => w.core.createOrganization(stranger, { tenantId: a.tenant.id, name: "no" }));
   assert.ok((await w.audit.list(a.tenant.id)).some(e => e.action === "organization.create.denied" && e.result === "failure"));
   assert.equal(await count(w, "organizations", a.tenant.id), "0");
+});
+
+
+// ---------- Etapa 5: consent, contacts, demands ----------
+
+async function careTenant(w: W, name: string) {
+  const t = await tenantWithAdmin(w, name);
+  const root = platformContext({ actorUserId: "root" }), rootIn = tenantContext({ tenantId: t.tenant.id, actorUserId: "root" });
+  const org = await w.core.createOrganization(t.ctx, { tenantId: t.tenant.id, name: "UBS" });
+  const octx = tenantContext({ tenantId: t.tenant.id, organizationId: org.id, actorUserId: t.admin.id });
+  const idn = uid("idn"); w.identities.register({ id: idn, subject: idn });
+  const svc = await w.core.createUser(rootIn, { tenantId: t.tenant.id, identityId: idn, displayName: "whatsapp integration" });
+  const role = await w.core.createRole(root, { name: uid("integration"), architecturalRole: "integration-service" });
+  await w.core.assignRole(rootIn, { userId: svc.id, roleId: role.id, scope: { level: "organization", tenantId: t.tenant.id, organizationId: org.id } });
+  const accountId = uid("PHONE");
+  await w.connections.save({ id: uid("cx"), tenantId: t.tenant.id, organizationId: org.id, channel: "whatsapp", accountId, serviceUserId: svc.id, status: "active" });
+  const draft = await w.programs.createProgram(octx, { key: "dm", name: "DM", rules: [{ id: "d", signal: "unanswered-demand", responseHours: 24, windowDays: 30 }], continuity: CONTINUITY });
+  const idn2 = uid("idn"); w.identities.register({ id: idn2, subject: idn2 });
+  const approver = await w.core.createUser(t.ctx, { tenantId: t.tenant.id, identityId: idn2, displayName: "approver" });
+  const r2 = await w.core.createRole(t.ctx, { name: uid("Admin2"), architecturalRole: "tenant-admin" });
+  await w.core.assignRole(t.ctx, { userId: approver.id, roleId: r2.id, scope: { level: "tenant", tenantId: t.tenant.id } });
+  await w.programs.approveProgram(tenantContext({ tenantId: t.tenant.id, organizationId: org.id, actorUserId: approver.id }), draft.id);
+  return { ...t, org, octx, accountId, svc };
+}
+const msg = (accountId: string, id: string, from: string) => ({ channel: "whatsapp" as const, accountId, externalId: id, from, receivedAt: new Date(Date.now() - 60_000).toISOString(), kind: "text" as const, text: "preciso de ajuda" });
+
+test("postgres intake: a verified sender is linked, redelivery across connections stores one demand and one fact", { skip }, async () => {
+  const w = build();
+  const t = await careTenant(w, "Intake");
+  const s = await w.core.createSubject(t.octx, { tenantId: t.tenant.id, organizationId: t.org.id, displayName: "Maria" });
+  const e = await w.programs.enroll(t.octx, { subjectId: s.id, programKey: "dm" });
+  await w.intake.bindContact(t.octx, { subjectId: s.id, channel: "whatsapp", address: "+55 11 98888-7777", verification: "staff" });
+  const results = await Promise.all(Array.from({ length: 10 }, () => w.intake.receive(msg(t.accountId, "wamid.same", "5511988887777"))));
+  assert.equal(results.filter(r => r.status === "stored" && !r.duplicate).length, 1);
+  assert.equal(await count(w, "patient_demands", t.tenant.id), "1");
+  const facts = (await w.prog.facts.listInTenant(t.tenant.id)).filter(f => f.enrollmentId === e.id && f.kind === "demand.opened");
+  assert.equal(facts.length, 1);
+  assert.equal((await w.intake.listDemands(t.octx))[0]!.subjectId, s.id);
+});
+
+test("postgres intake: consent keeps one granted record, revocation is immediate, history stays", { skip }, async () => {
+  const w = build();
+  const t = await careTenant(w, "Consent");
+  const s = await w.core.createSubject(t.octx, { tenantId: t.tenant.id, organizationId: t.org.id, displayName: "Ana" });
+  const g = { subjectId: s.id, channel: "whatsapp" as const, purpose: "reminders" as const, legalBasis: "consent" as const, evidence: "form" };
+  const [a, b] = await Promise.all([w.intake.grantConsent(t.octx, g), w.intake.grantConsent(t.octx, g)]);
+  assert.equal(a.id, b.id);
+  assert.equal(await w.intake.canContact(t.tenant.id, s.id, "whatsapp", "reminders"), true);
+  await w.intake.revokeConsent(t.octx, a.id);
+  assert.equal(await w.intake.canContact(t.tenant.id, s.id, "whatsapp", "reminders"), false);
+  assert.equal(await count(w, "consent_records", t.tenant.id), "1");
+  await assert.rejects(() => w.db.withScope({ tenantId: t.tenant.id }, q => q.query("insert into heal.consent_records (id, tenant_id, subject_id, channel, purpose, status, doc) values ($1,$2,$3,'whatsapp','reminders','granted','{}'), ($4,$2,$3,'whatsapp','reminders','granted','{}')", [uid("c"), t.tenant.id, s.id, uid("c")])), /unique|duplicate/i, "the database refuses two granted consents for the same purpose");
+});
+
+test("RLS (intake): new tables are isolated, an account belongs to one tenant, the integration identity must be the tenant's own", { skip }, async () => {
+  const w = build();
+  const a = await careTenant(w, "IsoA"), b = await careTenant(w, "IsoB");
+  const sa = await w.core.createSubject(a.octx, { tenantId: a.tenant.id, organizationId: a.org.id, displayName: "A-person" });
+  await w.intake.bindContact(a.octx, { subjectId: sa.id, channel: "whatsapp", address: "+5511977770000", verification: "staff" });
+  await w.intake.receive(msg(a.accountId, "iso-1", "5511977770000"));
+  await w.intake.grantConsent(a.octx, { subjectId: sa.id, channel: "whatsapp", purpose: "reminders", legalBasis: "consent", evidence: "f" });
+  for (const table of ["consent_records", "contact_bindings", "patient_demands", "channel_connections"]) {
+    const rows = await w.db.withScope({ tenantId: b.tenant.id }, q => q.query(`select tenant_id from heal.${table}`));
+    assert.ok(rows.rows.every((r: any) => r.tenant_id === b.tenant.id), table);
+  }
+  assert.equal(await count(w, "patient_demands", b.tenant.id), "0");
+  // Tenant B cannot claim tenant A's WhatsApp account, nor use tenant A's user as its integration identity.
+  const rival = { id: uid("cx"), tenantId: b.tenant.id, organizationId: b.org.id, channel: "whatsapp" as const, status: "active" as const };
+  await assert.rejects(() => w.connections.save({ ...rival, accountId: a.accountId, serviceUserId: b.svc.id }), /unique|duplicate/i);
+  await assert.rejects(() => w.connections.save({ ...rival, accountId: uid("PHONE"), serviceUserId: a.svc.id }), /foreign key|violates/i);
+  // A message to an account of tenant A never lands in tenant B.
+  const out = await w.intake.receive(msg(b.accountId, "iso-2", "5511977770000"));
+  assert.equal((out as any).demand.tenantId, b.tenant.id);
+  assert.equal((out as any).demand.subjectId, undefined, "tenant A's binding is invisible to tenant B");
+});
+
+test("postgres intake: webhook end to end with a real signature", { skip }, async () => {
+  const w = build();
+  const t = await careTenant(w, "Hook");
+  const provider = new WhatsAppCloudProvider("pg-secret");
+  const { createHmac } = await import("node:crypto");
+  const body = JSON.stringify({ entry: [{ changes: [{ value: { metadata: { phone_number_id: t.accountId }, messages: [{ id: "wamid.hook", from: "5521911112222", timestamp: String(Math.floor(Date.now() / 1000) - 5), type: "text", text: { body: "oi" } }] } }] }] });
+  assert.equal(await w.intake.receiveWebhook(provider, body, { "x-hub-signature-256": "sha256=" + "0".repeat(64) }), "unauthentic");
+  const ok = await w.intake.receiveWebhook(provider, body, { "x-hub-signature-256": "sha256=" + createHmac("sha256", "pg-secret").update(body).digest("hex") });
+  assert.ok(Array.isArray(ok) && ok[0]!.status === "stored");
+  assert.equal(await count(w, "patient_demands", t.tenant.id), "1");
 });
