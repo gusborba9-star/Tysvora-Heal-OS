@@ -9,7 +9,7 @@ export class InMemoryUnitOfWork implements UnitOfWork {
   private tail: Promise<unknown> = Promise.resolve();
   constructor(private readonly participants: readonly Snapshottable[]) {}
 
-  run<T>(work: () => Promise<T>): Promise<T> {
+  run<T>(work: () => Promise<T>, _options?: { readonly tenantId?: string }): Promise<T> {
     const result = this.tail.then(async () => {
       const before = this.participants.map(p => p.captureState());
       try {

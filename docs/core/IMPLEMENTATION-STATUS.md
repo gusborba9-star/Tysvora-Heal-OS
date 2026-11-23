@@ -37,6 +37,12 @@ Tests were mutation-checked: removing each guard below makes at least one test f
 - Tests: 49 passing; every new guard was mutation-checked. The `scope.level === "platform"` clause in `assignRole` is defense in depth (the context check catches it first).
 - Still in-memory: the plan source, usage meter and queue/cache ports arrive with Etapa 4.
 
+## Postgres persistence (Etapa 4)
+- Schema `heal` on the Supabase project `Tysvora` (sa-east-1), migrations 0001-0005 applied; all 17 tables have forced RLS; security advisor clean. Details: `docs/core/POSTGRES.md`.
+- Adapter (`src/core/infrastructure/postgres/`): tenant-scoped repositories, transactional unit of work with per-tenant advisory lock, audit sink, outbox publisher, entitlement source and usage meter. `UnitOfWork.run` now receives the tenant.
+- 11 tests run against a real Postgres (end-to-end flow, atomic rollback, race-free limits/quotas/de-duplication, RLS attacks). Mutation-checked: opening a read/insert policy, removing the lock, granting delete on audit, opening platform writes each fail the suite.
+- Still open: login role + pooler for the API, OIDC/MFA identity provider, outbox relay, queue/cache ports, LGPD retention/encryption policy.
+
 ## Open decisions (need the owner)
 
 1. Roles have no tenant owner (global registry). A tenant can reference a role created elsewhere if it knows the id. Needs `Role.tenantId` or a platform-curated catalog.

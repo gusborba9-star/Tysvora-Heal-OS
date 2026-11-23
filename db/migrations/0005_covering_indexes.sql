@@ -1,0 +1,11 @@
+create index units_org_idx on heal.units (tenant_id, organization_id);
+create index subjects_org_idx on heal.subjects (tenant_id, organization_id);
+create index professionals_org_idx on heal.professionals (tenant_id, organization_id);
+create index professionals_user_idx on heal.professionals (tenant_id, user_id);
+create index program_definitions_org_idx on heal.program_definitions (tenant_id, organization_id);
+create index program_enrollments_org_idx on heal.program_enrollments (tenant_id, organization_id);
+create index program_enrollments_definition_idx on heal.program_enrollments (tenant_id, definition_id);
+create index pendencies_subject_idx on heal.pendencies (tenant_id, subject_id);
+create index roles_tenant_idx on heal.roles (tenant_id);
+create index user_roles_role_idx on heal.user_roles (role_id);
+create index user_roles_tenant_idx on heal.user_roles (tenant_id);
