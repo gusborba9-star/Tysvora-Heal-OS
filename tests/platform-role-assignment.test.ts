@@ -4,7 +4,7 @@ import {
   AuthorizationService, AuthorizationRequest, AuthorizationError, DomainInvariantError,
   createTenant, createOrganization, createUnit, createUser, createRole, createUserRole
 } from "../src/index.js";
-import { acceptAllIdentities, unitOfWorkFor } from "./helpers.js";
+import { acceptAllIdentities, unitOfWorkFor, unlimited } from "./helpers.js";
 
 function assert(value: unknown, message: string): asserts value { if (!value) throw new Error("Assertion failed: " + message); }
 async function rejects(factory: () => Promise<unknown>, ErrorType: Function, message: string): Promise<void> {
@@ -28,7 +28,7 @@ const app = new HealCoreApplication({
   ids: new SequenceIdGenerator("04b"), clock: new FixedClock("2026-10-08T00:00:00.000Z"),
   authorization: policy, audit, events, tenants, organizations, units,
   users, professionals: new InMemoryRepository<any>(), subjects: new InMemoryRepository<any>(),
-  roles, userRoles, identities: acceptAllIdentities, unitOfWork: unitOfWorkFor(audit, events, tenants, organizations, units, users, roles, userRoles)
+  roles, userRoles, identities: acceptAllIdentities, entitlements: unlimited, unitOfWork: unitOfWorkFor(audit, events, tenants, organizations, units, users, roles, userRoles)
 });
 const platform = platformContext({ actorUserId: "platform-actor", correlationId: "platform-corr" });
 const tenantA = await app.createTenant(platform, { name: "Tenant A" });
@@ -55,7 +55,7 @@ const platformAudit = new InMemoryAuditSink(), platformEvents = new InMemoryEven
 const platformApp = new HealCoreApplication({
   ids: new SequenceIdGenerator("platform-grant"), clock: new FixedClock("2026-10-08T00:00:00.000Z"),
   authorization: platformGrantPolicy, audit: platformAudit, events: platformEvents, tenants, organizations, units,
-  users, professionals: new InMemoryRepository<any>(), subjects: new InMemoryRepository<any>(), roles, userRoles: new InMemoryUserRoleRepository(), identities: acceptAllIdentities, unitOfWork: unitOfWorkFor()
+  users, professionals: new InMemoryRepository<any>(), subjects: new InMemoryRepository<any>(), roles, userRoles: new InMemoryUserRoleRepository(), identities: acceptAllIdentities, entitlements: unlimited, unitOfWork: unitOfWorkFor()
 });
 const granted = await platformApp.assignRole(platform, { userId: userA.id, roleId: platformRole.id, scope: { level: "platform" } });
 assert(granted.scope.level === "platform", "platform context succeeds when specific and generic authorization are granted");
@@ -68,7 +68,7 @@ const deniedSpecificAudit = new InMemoryAuditSink(), deniedSpecificEvents = new 
 const deniedSpecificApp = new HealCoreApplication({
   ids: new SequenceIdGenerator("platform-denied"), clock: new FixedClock("2026-10-08T00:00:00.000Z"),
   authorization: deniedSpecificPolicy, audit: deniedSpecificAudit, events: deniedSpecificEvents, tenants, organizations, units,
-  users, professionals: new InMemoryRepository<any>(), subjects: new InMemoryRepository<any>(), roles, userRoles: new InMemoryUserRoleRepository(), identities: acceptAllIdentities, unitOfWork: unitOfWorkFor()
+  users, professionals: new InMemoryRepository<any>(), subjects: new InMemoryRepository<any>(), roles, userRoles: new InMemoryUserRoleRepository(), identities: acceptAllIdentities, entitlements: unlimited, unitOfWork: unitOfWorkFor()
 });
 await rejects(() => deniedSpecificApp.assignRole(platform, { userId: userA.id, roleId: platformRole.id, scope: { level: "platform" } }), AuthorizationError, "platform assignment denied without specific authorization");
 assert(deniedSpecificAudit.snapshot().every(e => e.result === "failure") && deniedSpecificEvents.snapshot().length === 0, "specific authorization denial has no success side effects");

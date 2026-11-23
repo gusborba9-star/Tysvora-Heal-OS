@@ -1,5 +1,6 @@
 import { EntityId } from "../shared/ids.js";
 import { ApplicationKernel, KernelDependencies } from "../core/application/kernel.js";
+import { EntitlementGate } from "../core/application/entitlements.js";
 import { ApplicationContext, NotFoundError } from "../core/application/shared.js";
 import { DomainInvariantError } from "../core/domain/errors.js";
 import { Subject, User } from "../core/domain/entities.js";
@@ -16,6 +17,7 @@ export interface TenantStore<T extends { readonly id: string }> {
   save(entity: T): Promise<void>;
 }
 export interface ProgramApplicationDependencies extends KernelDependencies {
+  readonly entitlements: EntitlementGate;
   readonly definitions: TenantStore<ProgramDefinition>;
   readonly enrollments: TenantStore<ProgramEnrollment>;
   readonly facts: TenantStore<ProgramFact>;
@@ -58,6 +60,7 @@ export class ProgramApplication {
   async createProgram(context: ApplicationContext, command: CreateProgramCommand, version = 1): Promise<ProgramDefinition> {
     const { tenantId, organizationId } = this.scope(context);
     await this.k.authorize(context, "program.create", "program");
+    await this.d.entitlements.requireFeature(tenantId, "program-engine");
     const entity = createProgramDefinition({ id: this.d.ids.next(), tenantId, organizationId, key: command.key, version, name: command.name, rules: command.rules, continuity: command.continuity, createdBy: context.actorUserId });
     const existing = (await this.d.definitions.listInTenant(tenantId)).filter(x => x.organizationId === organizationId && x.key === entity.key);
     if (existing.some(x => x.version === entity.version)) throw new DomainInvariantError("program key and version already exist");
@@ -87,13 +90,14 @@ export class ProgramApplication {
   async enroll(context: ApplicationContext, command: { subjectId: EntityId; programKey: string }): Promise<ProgramEnrollment> {
     const { tenantId, organizationId } = this.scope(context);
     await this.k.authorize(context, "program.enroll", "enrollment", command.subjectId);
+    await this.d.entitlements.requireFeature(tenantId, "program-engine");
     const subject = await this.inOrganization(context, "program.enroll", "subject", command.subjectId, await this.d.subjects.getInTenant(tenantId, command.subjectId));
     const def = await this.latestApproved(tenantId, organizationId, command.programKey);
     if (!def) throw new NotFoundError("approved program", command.programKey);
     const active = (await this.d.enrollments.listInTenant(tenantId)).find(e => e.subjectId === subject.id && e.programKey === def.key && e.status === "active");
     if (active) throw new DomainInvariantError("subject is already actively enrolled in this program");
     const entity: ProgramEnrollment = { id: this.d.ids.next(), tenantId, organizationId, subjectId: subject.id, programKey: def.key, definitionId: def.id, programVersion: def.version, status: "active", enrolledAt: this.d.clock.now() };
-    await this.k.commit(context, tenantId, { save: () => this.d.enrollments.save(entity), action: "enrollment.created", resource: "enrollment", resourceId: entity.id, eventType: "enrollment.created", payload: { enrollmentId: entity.id, programVersion: entity.programVersion } });
+    await this.k.commit(context, tenantId, { precondition: async () => this.d.entitlements.assertCanAdd(tenantId, "enrollments", (await this.d.enrollments.listInTenant(tenantId)).filter(e => e.status === "active").length), save: () => this.d.enrollments.save(entity), action: "enrollment.created", resource: "enrollment", resourceId: entity.id, eventType: "enrollment.created", payload: { enrollmentId: entity.id, programVersion: entity.programVersion } });
     return entity;
   }
 
@@ -119,6 +123,7 @@ export class ProgramApplication {
   async evaluateContinuity(context: ApplicationContext, enrollmentId: EntityId): Promise<EvaluationResult> {
     const { tenantId, organizationId } = this.scope(context);
     await this.k.authorize(context, "sentinela.evaluate", "enrollment", enrollmentId);
+    await this.d.entitlements.requireFeature(tenantId, "sentinela");
     const enrollment = await this.activeEnrollment(context, "sentinela.evaluate", enrollmentId);
     const def = await this.d.definitions.getInTenant(tenantId, enrollment.definitionId);
     if (!def) throw new NotFoundError("program", enrollment.definitionId);

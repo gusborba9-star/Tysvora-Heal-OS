@@ -3,7 +3,7 @@ import {
   InMemoryAuditSink, InMemoryEventPublisher, InMemoryRepository, InMemoryUserRoleRepository,
   AuthorizationService, AuthorizationRequest, DomainInvariantError, NotFoundError, AuthorizationError
 } from "../src/index.js";
-import { acceptAllIdentities, unitOfWorkFor } from "./helpers.js";
+import { acceptAllIdentities, unitOfWorkFor, unlimited } from "./helpers.js";
 
 function assert(value: unknown, message: string): asserts value { if (!value) throw new Error("Assertion failed: " + message); }
 async function rejects(factory: () => Promise<unknown>, ErrorType: Function, message: string): Promise<void> {
@@ -22,7 +22,7 @@ const audit = new InMemoryAuditSink();
 const events = new InMemoryEventPublisher();
 const app = new HealCoreApplication({
   ids: new SequenceIdGenerator("id"), clock: new FixedClock("2026-10-08T00:00:00.000Z"),
-  authorization: new AllowAuthorization(), audit, events, identities: acceptAllIdentities, unitOfWork: unitOfWorkFor(audit, events, ...Object.values(repos)), ...repos
+  authorization: new AllowAuthorization(), audit, events, identities: acceptAllIdentities, entitlements: unlimited, unitOfWork: unitOfWorkFor(audit, events, ...Object.values(repos)), ...repos
 });
 
 const platform = platformContext({ actorUserId: "platform-actor", correlationId: "corr-1" });
@@ -51,7 +51,7 @@ await rejects(() => app.assignRole(tenantAdmin, { userId: "missing-user", roleId
 
 const denied = new HealCoreApplication({
   ids: new SequenceIdGenerator("deny"), clock: new FixedClock("2026-10-08T00:00:00.000Z"),
-  authorization: new DenyAuthorization(), audit: new InMemoryAuditSink(), events: new InMemoryEventPublisher(), identities: acceptAllIdentities, unitOfWork: unitOfWorkFor(), ...repos
+  authorization: new DenyAuthorization(), audit: new InMemoryAuditSink(), events: new InMemoryEventPublisher(), identities: acceptAllIdentities, entitlements: unlimited, unitOfWork: unitOfWorkFor(), ...repos
 });
 await rejects(() => denied.createUser(orgContext, { tenantId: tenant.id, identityId: "identity-denied", displayName: "Denied" }), AuthorizationError, "authorization denial");
 

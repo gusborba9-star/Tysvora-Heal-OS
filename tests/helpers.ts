@@ -7,3 +7,6 @@ export const acceptAllIdentities: IdentityProvider = {
 export function unitOfWorkFor(...participants: Snapshottable[]): InMemoryUnitOfWork {
   return new InMemoryUnitOfWork(participants);
 }
+
+import { UnlimitedEntitlementsForTestsOnly } from "../src/index.js";
+export const unlimited = new UnlimitedEntitlementsForTestsOnly();

@@ -30,6 +30,13 @@ Tests were mutation-checked: removing each guard below makes at least one test f
 - Tenant and organization isolation on every operation; every operation is authorized and audited.
 - Same engine runs different programs by configuration only (diabetes and veterinary vaccine return are both tested).
 
+## RBAC, owned roles and entitlements (Etapa 3)
+- `RbacAuthorizationService`: deny by default, scope coverage (tenant > organization > unit), explicit permission catalog per architectural role (`permissions.ts`, no wildcards), no privilege escalation on role assignment, break-glass platform operators limited to tenant provisioning.
+- Roles are owned: `tenantId` absent = platform catalog role; a tenant's role is invisible (NotFound) to other tenants and cannot be granted platform-wide.
+- Entitlements (`entitlements.ts`): plan limits, monthly quotas and feature flags are configuration, not code; per-tenant overrides; fail closed when a tenant has no plan; limit checks run inside the unit of work (race-free). `UsageService` meters consumption per tenant/month (the base for per-client cost monitoring). Plan numbers are owner decisions and live in an `EntitlementSource`, not in the code.
+- Tests: 49 passing; every new guard was mutation-checked. The `scope.level === "platform"` clause in `assignRole` is defense in depth (the context check catches it first).
+- Still in-memory: the plan source, usage meter and queue/cache ports arrive with Etapa 4.
+
 ## Open decisions (need the owner)
 
 1. Roles have no tenant owner (global registry). A tenant can reference a role created elsewhere if it knows the id. Needs `Role.tenantId` or a platform-curated catalog.
