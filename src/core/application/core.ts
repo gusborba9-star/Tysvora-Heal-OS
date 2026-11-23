@@ -1,15 +1,14 @@
 import { EntityId } from "../../shared/ids.js";
+import { ApplicationContext, ApplicationError, AuthorizationError, AuthorizationService, NotFoundError } from "./shared.js";
+import { ApplicationKernel } from "./kernel.js";
+export * from "./shared.js";
 import { Tenant, Organization, Unit, User, Professional, Subject, createTenant, createOrganization, createUnit, createUser, createProfessional, createSubject } from "../domain/entities.js";
 import { Role, UserRole, createRole, createUserRole } from "../domain/access.js";
 import { createAuditEntry } from "../domain/audit.js";
 import { createDomainEvent } from "../domain/event.js";
 import { DomainInvariantError } from "../domain/errors.js";
-import { EventPublisher } from "../contracts/core.js";
+import { EventPublisher, IdentityProvider, UnitOfWork } from "../contracts/core.js";
 import { TenantRepository, OrganizationRepository, UnitRepository, UserRepository, ProfessionalRepository, SubjectRepository, RoleRepository, UserRoleRepository, AuditSink, IdGenerator, Clock } from "./../contracts/application.js";
-
-export type ApplicationContext =
-  | { readonly scope: "platform"; readonly actorUserId?: EntityId; readonly correlationId?: string }
-  | { readonly scope: "tenant"; readonly tenantId: EntityId; readonly organizationId?: EntityId; readonly unitId?: EntityId; readonly actorUserId?: EntityId; readonly correlationId?: string };
 
 export type CreateTenantCommand = { readonly name: string };
 export type CreateOrganizationCommand = { readonly tenantId: EntityId; readonly name: string };
@@ -20,22 +19,11 @@ export type CreateSubjectCommand = { readonly tenantId: EntityId; readonly organ
 export type CreateRoleCommand = { readonly name: string; readonly architecturalRole?: Role["architecturalRole"] };
 export type AssignRoleCommand = { readonly userId: EntityId; readonly roleId: EntityId; readonly scope: UserRole["scope"] };
 
-export interface AuthorizationRequest {
-  readonly actorUserId?: EntityId;
-  readonly action: string;
-  readonly resource: string;
-  readonly resourceId?: EntityId;
-  readonly context: ApplicationContext;
-}
-export interface AuthorizationService { can(request: AuthorizationRequest): Promise<boolean>; }
-
-export class ApplicationError extends Error { constructor(message: string) { super(message); this.name = "ApplicationError"; } }
-export class AuthorizationError extends ApplicationError { constructor(message = "operation not authorized") { super(message); this.name = "AuthorizationError"; } }
-export class NotFoundError extends ApplicationError { constructor(resource: string, id: string) { super(resource + " not found: " + id); this.name = "NotFoundError"; } }
-
 export interface CoreApplicationDependencies {
   readonly ids: IdGenerator;
   readonly clock: Clock;
+  readonly identities: IdentityProvider;
+  readonly unitOfWork: UnitOfWork;
   readonly authorization: AuthorizationService;
   readonly audit: AuditSink;
   readonly events: EventPublisher;
@@ -49,175 +37,145 @@ export interface CoreApplicationDependencies {
   readonly userRoles: UserRoleRepository;
 }
 
-export function platformContext(input: { actorUserId?: EntityId; correlationId?: string } = {}): ApplicationContext {
-  return { scope: "platform", actorUserId: input.actorUserId, correlationId: input.correlationId };
-}
-export function tenantContext(input: Omit<Extract<ApplicationContext, {scope:"tenant"}>, "scope">): ApplicationContext {
-  return { scope: "tenant", ...input };
-}
+const PRIVILEGED_ARCHITECTURAL_ROLES: ReadonlySet<string> = new Set(["platform-admin", "technical-operator"]);
 
 export class HealCoreApplication {
-  constructor(private readonly d: CoreApplicationDependencies) {}
-
-  private async authorize(context: ApplicationContext, action: string, resource: string, resourceId?: string): Promise<void> {
-    const allowed = await this.d.authorization.can({ actorUserId: context.actorUserId, action, resource, resourceId, context });
-    if (!allowed) throw new AuthorizationError(action + " on " + resource + " is not authorized");
-  }
-
-  private tenantId(context: ApplicationContext): EntityId {
-    if (context.scope !== "tenant") throw new ApplicationError("tenant context is required");
-    return context.tenantId;
-  }
-
-  private organizationId(context: ApplicationContext): EntityId {
-    if (context.scope !== "tenant" || !context.organizationId) throw new ApplicationError("organization context is required");
-    return context.organizationId;
-  }
-
-  private async audit(context: ApplicationContext, tenantId: EntityId, action: string, resource: string, resourceId: EntityId): Promise<void> {
-    await this.d.audit.append(createAuditEntry({
-      id: this.d.ids.next(), tenantId, actorId: context.actorUserId, action, resource, resourceId,
-      timestamp: this.d.clock.now(), correlationId: context.correlationId, result: "success"
-    }));
-  }
-
-  private async event(context: ApplicationContext, tenantId: EntityId, eventType: string, payload: unknown): Promise<void> {
-    await this.d.events.publish(createDomainEvent({
-      eventId: this.d.ids.next(), eventType, version: 1, occurredAt: this.d.clock.now(),
-      tenantId, actorId: context.actorUserId, source: "heal-core.application",
-      correlationId: context.correlationId, payload
-    }));
-  }
+  private readonly k: ApplicationKernel;
+  constructor(private readonly d: CoreApplicationDependencies) { this.k = new ApplicationKernel(d); }
 
   async createTenant(context: ApplicationContext, command: CreateTenantCommand): Promise<Tenant> {
     if (context.scope !== "platform") throw new ApplicationError("tenant creation requires platform context");
-    await this.authorize(context, "tenant.create", "tenant");
+    await this.k.authorize(context, "tenant.create", "tenant");
     const entity = createTenant({ id: this.d.ids.next(), name: command.name });
-    await this.d.tenants.save(entity);
-    await this.audit(context, entity.id, "tenant.created", "tenant", entity.id);
-    await this.event(context, entity.id, "tenant.created", { tenantId: entity.id });
+    await this.k.commit(context, entity.id, { save: () => this.d.tenants.save(entity), action: "tenant.created", resource: "tenant", resourceId: entity.id, eventType: "tenant.created", payload: { tenantId: entity.id } });
     return entity;
   }
 
   async getTenant(context: ApplicationContext, id: EntityId): Promise<Tenant> {
-    await this.authorize(context, "tenant.read", "tenant", id);
+    await this.k.authorize(context, "tenant.read", "tenant", id);
+    // A foreign tenant is indistinguishable from a missing one: no existence oracle across tenants.
+    if (context.scope === "tenant" && context.tenantId !== id) {
+      await this.k.refuse(context, "tenant.read", "tenant", id, "outside-tenancy", new NotFoundError("tenant", id));
+    }
     const entity = await this.d.tenants.getById(id);
     if (!entity) throw new NotFoundError("tenant", id);
-    if (context.scope === "tenant" && context.tenantId !== entity.id) throw new DomainInvariantError("tenant is outside request tenancy");
     return entity;
   }
 
   async createOrganization(context: ApplicationContext, command: CreateOrganizationCommand): Promise<Organization> {
-    const tenantId = this.tenantId(context);
-    if (command.tenantId !== tenantId) throw new DomainInvariantError("organization tenant does not match request tenancy");
-    await this.authorize(context, "organization.create", "organization");
+    const tenantId = this.k.tenantId(context);
+    await this.k.requireTenancy(context, command.tenantId === tenantId, "organization.create", "organization", "organization tenant does not match request tenancy");
+    await this.k.authorize(context, "organization.create", "organization");
     const tenant = await this.d.tenants.getById(command.tenantId);
     if (!tenant) throw new NotFoundError("tenant", command.tenantId);
     const entity = createOrganization({ id: this.d.ids.next(), tenantId: command.tenantId, name: command.name }, tenant);
-    await this.d.organizations.save(entity);
-    await this.audit(context, tenantId, "organization.created", "organization", entity.id);
-    await this.event(context, tenantId, "organization.created", { organizationId: entity.id });
+    await this.k.commit(context, tenantId, { save: () => this.d.organizations.save(entity), action: "organization.created", resource: "organization", resourceId: entity.id, eventType: "organization.created", payload: { organizationId: entity.id } });
     return entity;
   }
 
   async createUnit(context: ApplicationContext, command: CreateUnitCommand): Promise<Unit> {
-    const tenantId = this.tenantId(context);
-    if (command.tenantId !== tenantId || this.organizationId(context) !== command.organizationId) throw new DomainInvariantError("unit is outside request tenancy");
-    await this.authorize(context, "unit.create", "unit");
-    const organization = await this.d.organizations.getById(command.organizationId);
+    const tenantId = this.k.tenantId(context);
+    await this.k.requireTenancy(context, command.tenantId === tenantId && this.k.organizationId(context) === command.organizationId, "unit.create", "unit", "unit is outside request tenancy");
+    await this.k.authorize(context, "unit.create", "unit");
+    const organization = await this.d.organizations.getInTenant(tenantId, command.organizationId);
     if (!organization) throw new NotFoundError("organization", command.organizationId);
     const entity = createUnit({ id: this.d.ids.next(), tenantId: command.tenantId, organizationId: command.organizationId, name: command.name }, organization);
-    await this.d.units.save(entity);
-    await this.audit(context, tenantId, "unit.created", "unit", entity.id);
-    await this.event(context, tenantId, "unit.created", { unitId: entity.id });
+    await this.k.commit(context, tenantId, { save: () => this.d.units.save(entity), action: "unit.created", resource: "unit", resourceId: entity.id, eventType: "unit.created", payload: { unitId: entity.id } });
     return entity;
   }
 
   async createUser(context: ApplicationContext, command: CreateUserCommand): Promise<User> {
-    const tenantId = this.tenantId(context);
-    if (command.tenantId !== tenantId) throw new DomainInvariantError("user tenant does not match request tenancy");
-    await this.authorize(context, "user.create", "user");
+    const tenantId = this.k.tenantId(context);
+    await this.k.requireTenancy(context, command.tenantId === tenantId, "user.create", "user", "user tenant does not match request tenancy");
+    await this.k.authorize(context, "user.create", "user");
     const tenant = await this.d.tenants.getById(tenantId);
     if (!tenant) throw new NotFoundError("tenant", tenantId);
-    const entity = createUser({ id: this.d.ids.next(), tenantId, identityId: command.identityId, displayName: command.displayName }, tenant);
-    await this.d.users.save(entity);
-    await this.audit(context, tenantId, "user.created", "user", entity.id);
-    await this.event(context, tenantId, "user.created", { userId: entity.id });
+    const identity = await this.d.identities.resolve(command.identityId);
+    if (!identity) throw new NotFoundError("identity", command.identityId);
+    const entity = createUser({ id: this.d.ids.next(), tenantId, identityId: identity.id, displayName: command.displayName }, tenant);
+    await this.k.commit(context, tenantId, { save: () => this.d.users.save(entity), action: "user.created", resource: "user", resourceId: entity.id, eventType: "user.created", payload: { userId: entity.id } });
     return entity;
   }
 
   async createProfessional(context: ApplicationContext, command: CreateProfessionalCommand): Promise<Professional> {
-    const tenantId = this.tenantId(context);
-    if (command.tenantId !== tenantId || this.organizationId(context) !== command.organizationId) throw new DomainInvariantError("professional is outside request tenancy");
-    await this.authorize(context, "professional.create", "professional");
-    const user = await this.d.users.getById(command.userId);
-    const organization = await this.d.organizations.getById(command.organizationId);
+    const tenantId = this.k.tenantId(context);
+    await this.k.requireTenancy(context, command.tenantId === tenantId && this.k.organizationId(context) === command.organizationId, "professional.create", "professional", "professional is outside request tenancy");
+    await this.k.authorize(context, "professional.create", "professional");
+    const user = await this.d.users.getInTenant(tenantId, command.userId);
+    const organization = await this.d.organizations.getInTenant(tenantId, command.organizationId);
     if (!user) throw new NotFoundError("user", command.userId);
     if (!organization) throw new NotFoundError("organization", command.organizationId);
     const entity = createProfessional({ id: this.d.ids.next(), tenantId, userId: command.userId, organizationId: command.organizationId }, user, organization);
-    await this.d.professionals.save(entity);
-    await this.audit(context, tenantId, "professional.created", "professional", entity.id);
-    await this.event(context, tenantId, "professional.created", { professionalId: entity.id });
+    await this.k.commit(context, tenantId, { save: () => this.d.professionals.save(entity), action: "professional.created", resource: "professional", resourceId: entity.id, eventType: "professional.created", payload: { professionalId: entity.id } });
     return entity;
   }
 
   async createSubject(context: ApplicationContext, command: CreateSubjectCommand): Promise<Subject> {
-    const tenantId = this.tenantId(context);
-    if (command.tenantId !== tenantId || this.organizationId(context) !== command.organizationId) throw new DomainInvariantError("subject is outside request tenancy");
-    await this.authorize(context, "subject.create", "subject");
-    const organization = await this.d.organizations.getById(command.organizationId);
+    const tenantId = this.k.tenantId(context);
+    await this.k.requireTenancy(context, command.tenantId === tenantId && this.k.organizationId(context) === command.organizationId, "subject.create", "subject", "subject is outside request tenancy");
+    await this.k.authorize(context, "subject.create", "subject");
+    const organization = await this.d.organizations.getInTenant(tenantId, command.organizationId);
     if (!organization) throw new NotFoundError("organization", command.organizationId);
     const entity = createSubject({ id: this.d.ids.next(), tenantId, organizationId: command.organizationId, displayName: command.displayName }, organization);
-    await this.d.subjects.save(entity);
-    await this.audit(context, tenantId, "subject.created", "subject", entity.id);
-    await this.event(context, tenantId, "subject.created", { subjectId: entity.id });
+    await this.k.commit(context, tenantId, { save: () => this.d.subjects.save(entity), action: "subject.created", resource: "subject", resourceId: entity.id, eventType: "subject.created", payload: { subjectId: entity.id } });
     return entity;
   }
 
   async createRole(context: ApplicationContext, command: CreateRoleCommand): Promise<Role> {
-    const tenantId = this.tenantId(context);
-    await this.authorize(context, "role.create", "role");
+    const privileged = command.architecturalRole !== undefined && PRIVILEGED_ARCHITECTURAL_ROLES.has(command.architecturalRole);
+    if (privileged && context.scope !== "platform") {
+      await this.k.refuse(context, "role.create", "role", undefined, "privileged-role-outside-platform", new AuthorizationError("platform-level roles can only be created in platform context"));
+    }
+    await this.k.authorize(context, "role.create", "role", undefined, { architecturalRole: command.architecturalRole });
+    const auditTenant = this.k.auditTenantId(context);
     const entity = createRole({ id: this.d.ids.next(), name: command.name, architecturalRole: command.architecturalRole });
-    await this.d.roles.save(entity);
-    await this.audit(context, tenantId, "role.created", "role", entity.id);
-    await this.event(context, tenantId, "role.created", { roleId: entity.id });
+    await this.k.commit(context, auditTenant, { save: () => this.d.roles.save(entity), action: "role.created", resource: "role", resourceId: entity.id, eventType: "role.created", payload: { roleId: entity.id } });
     return entity;
   }
 
+  /** The acting context must be at least as broad as the scope it grants: org-level admins cannot grant tenant-wide or other-org roles. */
+  private contextCoversScope(context: Extract<ApplicationContext, { scope: "tenant" }>, scope: Exclude<UserRole["scope"], { level: "platform" }>): boolean {
+    if (scope.level === "tenant") return !context.organizationId && !context.unitId;
+    if (scope.level === "organization") return !context.unitId && (!context.organizationId || context.organizationId === scope.organizationId);
+    return (!context.organizationId || context.organizationId === scope.organizationId) && (!context.unitId || context.unitId === scope.unitId);
+  }
+
   async assignRole(context: ApplicationContext, command: AssignRoleCommand): Promise<UserRole> {
-    // Platform-wide assignments are a separate privilege boundary. Reject tenant
-    // contexts before generic authorization, reads, persistence, audit or events.
-    if (command.scope.level === "platform") {
+    const scope = command.scope;
+    const role = await this.d.roles.getById(command.roleId);
+    if (!role) throw new NotFoundError("role", command.roleId);
+    const privilegedRole = role.architecturalRole !== undefined && PRIVILEGED_ARCHITECTURAL_ROLES.has(role.architecturalRole);
+    const attributes = { roleId: command.roleId, targetUserId: command.userId, scope, architecturalRole: role.architecturalRole };
+
+    // Platform-wide assignments, and any assignment of a platform-level role, are a separate privilege boundary.
+    if (scope.level === "platform") {
       if (context.scope !== "platform") {
-        throw new AuthorizationError("platform role assignment requires platform context");
+        await this.k.refuse(context, "role.assign.platform", "user-role", command.userId, "platform-assignment-outside-platform", new AuthorizationError("platform role assignment requires platform context"));
       }
-      await this.authorize(context, "role.assign.platform", "user-role");
+      await this.k.authorize(context, "role.assign.platform", "user-role", command.userId, attributes);
     } else {
-      const tenantId = this.tenantId(context);
-      if (command.scope.tenantId !== tenantId) {
-        throw new DomainInvariantError("role assignment tenant does not match request tenancy");
+      const tenantId = this.k.tenantId(context);
+      if (privilegedRole) {
+        await this.k.refuse(context, "role.assign", "user-role", command.userId, "privileged-role-below-platform", new AuthorizationError("platform-level roles can only be assigned at platform scope"));
       }
+      await this.k.requireTenancy(context, scope.tenantId === tenantId, "role.assign", "user-role", "role assignment tenant does not match request tenancy");
+      await this.k.requireTenancy(context, this.contextCoversScope(context as Extract<ApplicationContext, { scope: "tenant" }>, scope), "role.assign", "user-role", "role assignment is outside the acting organization or unit");
     }
 
-    // The specific platform permission does not replace the general assignment
-    // permission; both gates must pass for a platform-wide assignment.
-    await this.authorize(context, "role.assign", "user-role");
-    const user = await this.d.users.getById(command.userId);
-    const role = await this.d.roles.getById(command.roleId);
-    if (!user) throw new NotFoundError("user", command.userId);
-    if (!role) throw new NotFoundError("role", command.roleId);
+    // The specific platform permission does not replace the general assignment permission; both gates must pass.
+    await this.k.authorize(context, "role.assign", "user-role", command.userId, attributes);
 
-    const organization = command.scope.level === "organization" || command.scope.level === "unit"
-      ? await this.d.organizations.getById(command.scope.organizationId) : null;
-    const unit = command.scope.level === "unit" ? await this.d.units.getById(command.scope.unitId) : null;
-    if ((command.scope.level === "organization" || command.scope.level === "unit") && !organization) throw new NotFoundError("organization", command.scope.organizationId);
-    if (command.scope.level === "unit" && !unit) throw new NotFoundError("unit", command.scope.unitId);
+    const user = scope.level === "platform" ? await this.d.users.getById(command.userId) : await this.d.users.getInTenant(this.k.tenantId(context), command.userId);
+    if (!user) throw new NotFoundError("user", command.userId);
+    const tenantFilter = scope.level === "platform" ? user.tenantId : scope.tenantId;
+    const organization = scope.level === "organization" || scope.level === "unit" ? await this.d.organizations.getInTenant(tenantFilter, scope.organizationId) : null;
+    const unit = scope.level === "unit" ? await this.d.units.getInTenant(tenantFilter, scope.unitId) : null;
+    if ((scope.level === "organization" || scope.level === "unit") && !organization) throw new NotFoundError("organization", scope.organizationId);
+    if (scope.level === "unit" && !unit) throw new NotFoundError("unit", scope.unitId);
 
     const entity = createUserRole(command, user, organization ?? undefined, unit ?? undefined);
-    const auditTenantId = command.scope.level === "platform" ? user.tenantId : this.tenantId(context);
-    await this.d.userRoles.save(entity);
-    await this.audit(context, auditTenantId, "role.assigned", "user-role", entity.userId);
-    await this.event(context, auditTenantId, "role.assigned", { userId: entity.userId, roleId: entity.roleId, scope: command.scope.level });
+    const auditTenantId = scope.level === "platform" ? user.tenantId : this.k.tenantId(context);
+    await this.k.commit(context, auditTenantId, { save: () => this.d.userRoles.save(entity), action: "role.assigned", resource: "user-role", resourceId: entity.userId, eventType: "role.assigned", payload: { userId: entity.userId, roleId: entity.roleId, scope: scope.level } });
     return entity;
   }
 }

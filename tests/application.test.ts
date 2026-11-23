@@ -3,6 +3,7 @@ import {
   InMemoryAuditSink, InMemoryEventPublisher, InMemoryRepository, InMemoryUserRoleRepository,
   AuthorizationService, AuthorizationRequest, DomainInvariantError, NotFoundError, AuthorizationError
 } from "../src/index.js";
+import { acceptAllIdentities, unitOfWorkFor } from "./helpers.js";
 
 function assert(value: unknown, message: string): asserts value { if (!value) throw new Error("Assertion failed: " + message); }
 async function rejects(factory: () => Promise<unknown>, ErrorType: Function, message: string): Promise<void> {
@@ -21,7 +22,7 @@ const audit = new InMemoryAuditSink();
 const events = new InMemoryEventPublisher();
 const app = new HealCoreApplication({
   ids: new SequenceIdGenerator("id"), clock: new FixedClock("2026-10-08T00:00:00.000Z"),
-  authorization: new AllowAuthorization(), audit, events, ...repos
+  authorization: new AllowAuthorization(), audit, events, identities: acceptAllIdentities, unitOfWork: unitOfWorkFor(audit, events, ...Object.values(repos)), ...repos
 });
 
 const platform = platformContext({ actorUserId: "platform-actor", correlationId: "corr-1" });
@@ -45,12 +46,12 @@ assert(events.snapshot().length === 9, "event per relevant operation");
 
 await rejects(() => app.createOrganization(tenantAdmin, { tenantId: tenantB.id, name: "Cross Tenant" }), DomainInvariantError, "cross-tenant organization");
 await rejects(() => app.createUnit(orgContext, { tenantId: tenant.id, organizationId: "other-org", name: "Cross Organization" }), DomainInvariantError, "cross-organization unit");
-await rejects(() => app.getTenant(orgContext, tenantB.id), DomainInvariantError, "cross-tenant read");
-await rejects(() => app.assignRole(orgContext, { userId: "missing-user", roleId: role.id, scope: { level: "tenant", tenantId: tenant.id } }), NotFoundError, "missing user");
+await rejects(() => app.getTenant(orgContext, tenantB.id), NotFoundError, "cross-tenant read looks like not found");
+await rejects(() => app.assignRole(tenantAdmin, { userId: "missing-user", roleId: role.id, scope: { level: "tenant", tenantId: tenant.id } }), NotFoundError, "missing user");
 
 const denied = new HealCoreApplication({
   ids: new SequenceIdGenerator("deny"), clock: new FixedClock("2026-10-08T00:00:00.000Z"),
-  authorization: new DenyAuthorization(), audit: new InMemoryAuditSink(), events: new InMemoryEventPublisher(), ...repos
+  authorization: new DenyAuthorization(), audit: new InMemoryAuditSink(), events: new InMemoryEventPublisher(), identities: acceptAllIdentities, unitOfWork: unitOfWorkFor(), ...repos
 });
 await rejects(() => denied.createUser(orgContext, { tenantId: tenant.id, identityId: "identity-denied", displayName: "Denied" }), AuthorizationError, "authorization denial");
 

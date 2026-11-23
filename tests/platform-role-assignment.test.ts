@@ -4,6 +4,7 @@ import {
   AuthorizationService, AuthorizationRequest, AuthorizationError, DomainInvariantError,
   createTenant, createOrganization, createUnit, createUser, createRole, createUserRole
 } from "../src/index.js";
+import { acceptAllIdentities, unitOfWorkFor } from "./helpers.js";
 
 function assert(value: unknown, message: string): asserts value { if (!value) throw new Error("Assertion failed: " + message); }
 async function rejects(factory: () => Promise<unknown>, ErrorType: Function, message: string): Promise<void> {
@@ -27,7 +28,7 @@ const app = new HealCoreApplication({
   ids: new SequenceIdGenerator("04b"), clock: new FixedClock("2026-10-08T00:00:00.000Z"),
   authorization: policy, audit, events, tenants, organizations, units,
   users, professionals: new InMemoryRepository<any>(), subjects: new InMemoryRepository<any>(),
-  roles, userRoles
+  roles, userRoles, identities: acceptAllIdentities, unitOfWork: unitOfWorkFor(audit, events, tenants, organizations, units, users, roles, userRoles)
 });
 const platform = platformContext({ actorUserId: "platform-actor", correlationId: "platform-corr" });
 const tenantA = await app.createTenant(platform, { name: "Tenant A" });
@@ -43,8 +44,9 @@ await roles.save(platformRole);
 
 const beforeAudit = audit.snapshot().length, beforeEvents = events.snapshot().length;
 await rejects(() => app.assignRole(tenantCtx, { userId: userA.id, roleId: platformRole.id, scope: { level: "platform" } }), AuthorizationError, "tenant context cannot assign platform role");
-assert((await userRoles.getById(userA.id + ":" + platformRole.id)) === null, "denied platform assignment was not persisted");
-assert(audit.snapshot().length === beforeAudit, "denied platform assignment created no success audit");
+assert((await userRoles.listForUser(userA.id)).length === 0, "denied platform assignment was not persisted");
+assert(audit.snapshot().filter(e => e.result === "success").length === beforeAudit, "denied platform assignment created no success audit");
+assert(audit.snapshot().some(e => e.result === "failure" && e.action === "role.assign.platform.denied"), "denied platform assignment is audited as a failure");
 assert(events.snapshot().length === beforeEvents, "denied platform assignment published no success event");
 assert(!policy.requests.some(r => r.action === "role.assign.platform" && r.context.scope === "tenant"), "tenant cannot invoke the platform authorization path");
 
@@ -53,7 +55,7 @@ const platformAudit = new InMemoryAuditSink(), platformEvents = new InMemoryEven
 const platformApp = new HealCoreApplication({
   ids: new SequenceIdGenerator("platform-grant"), clock: new FixedClock("2026-10-08T00:00:00.000Z"),
   authorization: platformGrantPolicy, audit: platformAudit, events: platformEvents, tenants, organizations, units,
-  users, professionals: new InMemoryRepository<any>(), subjects: new InMemoryRepository<any>(), roles, userRoles: new InMemoryUserRoleRepository()
+  users, professionals: new InMemoryRepository<any>(), subjects: new InMemoryRepository<any>(), roles, userRoles: new InMemoryUserRoleRepository(), identities: acceptAllIdentities, unitOfWork: unitOfWorkFor()
 });
 const granted = await platformApp.assignRole(platform, { userId: userA.id, roleId: platformRole.id, scope: { level: "platform" } });
 assert(granted.scope.level === "platform", "platform context succeeds when specific and generic authorization are granted");
@@ -66,17 +68,17 @@ const deniedSpecificAudit = new InMemoryAuditSink(), deniedSpecificEvents = new 
 const deniedSpecificApp = new HealCoreApplication({
   ids: new SequenceIdGenerator("platform-denied"), clock: new FixedClock("2026-10-08T00:00:00.000Z"),
   authorization: deniedSpecificPolicy, audit: deniedSpecificAudit, events: deniedSpecificEvents, tenants, organizations, units,
-  users, professionals: new InMemoryRepository<any>(), subjects: new InMemoryRepository<any>(), roles, userRoles: new InMemoryUserRoleRepository()
+  users, professionals: new InMemoryRepository<any>(), subjects: new InMemoryRepository<any>(), roles, userRoles: new InMemoryUserRoleRepository(), identities: acceptAllIdentities, unitOfWork: unitOfWorkFor()
 });
 await rejects(() => deniedSpecificApp.assignRole(platform, { userId: userA.id, roleId: platformRole.id, scope: { level: "platform" } }), AuthorizationError, "platform assignment denied without specific authorization");
-assert(deniedSpecificAudit.snapshot().length === 0 && deniedSpecificEvents.snapshot().length === 0, "specific authorization denial has no success side effects");
+assert(deniedSpecificAudit.snapshot().every(e => e.result === "failure") && deniedSpecificEvents.snapshot().length === 0, "specific authorization denial has no success side effects");
 
 for (const scope of [
   { level: "tenant" as const, tenantId: tenantA.id },
   { level: "organization" as const, tenantId: tenantA.id, organizationId: orgA.id },
   { level: "unit" as const, tenantId: tenantA.id, organizationId: orgA.id, unitId: unitA.id }
 ]) {
-  const result = await app.assignRole(orgCtx, { userId: userA.id, roleId: role.id, scope });
+  const result = await app.assignRole(scope.level === "tenant" ? tenantCtx : orgCtx, { userId: userA.id, roleId: role.id, scope });
   assert(result.scope.level === scope.level, "valid " + scope.level + " assignment still works");
 }
 await rejects(() => app.assignRole(orgCtx, { userId: userA.id, roleId: role.id, scope: { level: "tenant", tenantId: tenantB.id } }), DomainInvariantError, "cross-tenant role assignment remains rejected");
