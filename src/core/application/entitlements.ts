@@ -100,7 +100,7 @@ export class UsageService {
         throw new EntitlementError("quota-exceeded", `monthly quota exceeded for ${metric} (${quota})`);
       }
       await this.d.meter.add(tenantId, metric, period, quantity);
-    });
+    }, { tenantId });
   }
 
   async usage(tenantId: EntityId, metric: QuotaMetric): Promise<{ used: number; quota?: number }> {

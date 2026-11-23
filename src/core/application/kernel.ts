@@ -89,7 +89,7 @@ export class ApplicationKernel {
       await this.audit(context, tenantId, spec.action, spec.resource, spec.resourceId);
       await this.event(context, tenantId, spec.eventType, spec.payload);
       return true;
-    });
+    }, { tenantId });
   }
 
   async requireTenancy(context: ApplicationContext, ok: boolean, action: string, resource: string, message: string): Promise<void> {

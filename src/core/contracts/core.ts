@@ -9,4 +9,7 @@ export interface TenantScopedRepository<T extends { readonly tenantId: string },
 export interface EventPublisher { publish<TPayload>(event:DomainEvent<TPayload>):Promise<void>; }
 export interface IdentityProvider { resolve(identityId:string):Promise<Identity|null>; }
 /** Atomic boundary: state, audit and events of one operation commit together or not at all. */
-export interface UnitOfWork { run<T>(work: () => Promise<T>): Promise<T>; }
+export interface UnitOfWork {
+  /** `tenantId` names the tenant whose writes this unit serializes (persistent adapters lock per tenant, so tenants never block each other). */
+  run<T>(work: () => Promise<T>, options?: { readonly tenantId?: string }): Promise<T>;
+}

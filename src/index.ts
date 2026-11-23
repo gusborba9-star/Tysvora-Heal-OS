@@ -21,3 +21,7 @@ export * from "./program/application.js";
 export * from "./core/domain/permissions.js";
 export * from "./core/application/rbac.js";
 export * from "./core/application/entitlements.js";
+export * from "./core/infrastructure/postgres/database.js";
+export * from "./core/infrastructure/postgres/repositories.js";
+export * from "./core/infrastructure/postgres/program-repositories.js";
+export * from "./core/infrastructure/postgres/entitlements.js";
