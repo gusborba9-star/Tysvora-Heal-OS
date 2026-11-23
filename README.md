@@ -29,6 +29,7 @@ Uma infraestrutura comum — Core, dados, UIP, segurança, workflow e inteligên
 O Heal Core possui contratos e implementações iniciais documentados. Consulte:
 - `docs/core/CORE-FOUNDATION.md`
 - `docs/core/APPLICATION-LAYER.md`
+- `docs/core/IMPLEMENTATION-STATUS.md` (o que existe em código e como foi verificado)
 - `docs/ROADMAP.md`
 
 Não confundir visão/roadmap com funcionalidade entregue. Persistência de produção, integrações, experiências completas, programas, engines clínicos, Sentinela e operação produtiva só podem ser considerados implementados quando houver código e evidências específicas.

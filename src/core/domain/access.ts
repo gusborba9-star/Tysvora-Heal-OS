@@ -1,4 +1,4 @@
-import { EntityId, requireNonEmpty } from "../../shared/ids.js";
+import { EntityId, requireNonEmpty, requireId, requireName } from "../../shared/ids.js";
 import { DomainInvariantError } from "./errors.js";
 import { Organization, Unit, User } from "./entities.js";
 
@@ -14,19 +14,19 @@ export type RoleAssignmentScope =
 export interface UserRole { readonly userId:EntityId; readonly roleId:EntityId; readonly scope:RoleAssignmentScope; }
 
 export function createRole(input:Role):Role {
-  return { id:requireNonEmpty(input.id,"role.id"), name:requireNonEmpty(input.name,"role.name"), architecturalRole:input.architecturalRole };
+  return { id:requireId(input.id,"role.id"), name:requireName(input.name,"role.name"), architecturalRole:input.architecturalRole };
 }
 export function createPermission(input:Permission):Permission {
-  return { id:requireNonEmpty(input.id,"permission.id"), code:requireNonEmpty(input.code,"permission.code") };
+  return { id:requireId(input.id,"permission.id"), code:requireNonEmpty(input.code,"permission.code") };
 }
 export function createRolePermission(input:RolePermission):RolePermission {
-  return { roleId:requireNonEmpty(input.roleId,"rolePermission.roleId"), permissionId:requireNonEmpty(input.permissionId,"rolePermission.permissionId") };
+  return { roleId:requireId(input.roleId,"rolePermission.roleId"), permissionId:requireId(input.permissionId,"rolePermission.permissionId") };
 }
 
 export function createUserRole(input:UserRole, user:User, organization?:Organization, unit?:Unit):UserRole {
   if (input.userId !== user.id) throw new DomainInvariantError("userRole.userId must match its user");
   validateScope(input.scope, user, organization, unit);
-  return { userId: user.id, roleId: requireNonEmpty(input.roleId,"userRole.roleId"), scope: input.scope };
+  return { userId: user.id, roleId: requireId(input.roleId,"userRole.roleId"), scope: input.scope };
 }
 
 function validateScope(scope:RoleAssignmentScope, user:User, organization?:Organization, unit?:Unit):void {
