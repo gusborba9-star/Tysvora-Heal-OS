@@ -43,6 +43,12 @@ Tests were mutation-checked: removing each guard below makes at least one test f
 - 11 tests run against a real Postgres (end-to-end flow, atomic rollback, race-free limits/quotas/de-duplication, RLS attacks). Mutation-checked: opening a read/insert policy, removing the lock, granting delete on audit, opening platform writes each fail the suite.
 - Still open: login role + pooler for the API, OIDC/MFA identity provider, outbox relay, queue/cache ports, LGPD retention/encryption policy.
 
+## Sentinela triggers (Etapa 5, first slice)
+- A recorded fact re-evaluates its enrollment (best effort: the fact is already committed, so an evaluation problem never makes the caller retry and duplicate it; the recorder needs no `sentinela.evaluate` permission and no denied-audit noise is produced).
+- `sweepContinuity` (daily, under a technical-operator identity): re-evaluates active enrollments of the acting organization because time itself is a signal (an exam turns overdue with no new fact). Idempotent, bounded per run (default 500, max 5000), one failing enrollment never stops the rest, gated by permission and plan feature.
+- Known limitation: an open pendency keeps the evidence it had when it opened (dedup); later signals are visible in a fresh evaluation but are not appended to the pendency history yet.
+- Deliberately NOT built yet: WhatsApp/patient demand intake. The Roadmap makes ConsentRecord/purpose limitation (Fase 5) and the communication ADRs prerequisites for real contact data, and it needs a WhatsApp provider account (business verification). Next slice: ConsentRecord + contact binding + idempotent inbound handler behind a provider-agnostic channel port, then the provider adapter.
+
 ## Open decisions (need the owner)
 
 1. Roles have no tenant owner (global registry). A tenant can reference a role created elsewhere if it knows the id. Needs `Role.tenantId` or a platform-curated catalog.
