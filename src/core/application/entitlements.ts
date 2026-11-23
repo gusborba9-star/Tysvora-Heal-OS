@@ -103,6 +103,12 @@ export class UsageService {
     }, { tenantId });
   }
 
+  /** Records consumption without enforcing the quota: for inbound traffic that must never be refused (visibility, not a gate). */
+  async record(tenantId: EntityId, metric: QuotaMetric, quantity: number): Promise<void> {
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 1_000_000) throw new ApplicationError("usage quantity must be a positive integer");
+    await this.d.unitOfWork.run(() => this.d.meter.add(tenantId, metric, usagePeriod(this.d.clock.now()), quantity), { tenantId });
+  }
+
   async usage(tenantId: EntityId, metric: QuotaMetric): Promise<{ used: number; quota?: number }> {
     const quota = await this.d.entitlements.quotaFor(tenantId, metric);
     return { used: await this.d.meter.total(tenantId, metric, usagePeriod(this.d.clock.now())), quota };

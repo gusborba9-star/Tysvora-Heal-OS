@@ -2,7 +2,7 @@ import { EntityId, requireNonEmpty, requireId, requireName } from "../../shared/
 import { DomainInvariantError } from "./errors.js";
 import { Organization, Unit, User } from "./entities.js";
 
-export type ArchitecturalRole = "platform-admin"|"tenant-admin"|"municipal-management"|"unit-management"|"professional"|"patient-user"|"technical-operator";
+export type ArchitecturalRole = "platform-admin"|"tenant-admin"|"municipal-management"|"unit-management"|"professional"|"patient-user"|"technical-operator"|"integration-service";
 /** `tenantId` absent = platform catalog role (curated by the platform); present = owned by, and usable only in, that tenant. */
 export interface Role { readonly id: EntityId; readonly name: string; readonly architecturalRole?: ArchitecturalRole; readonly tenantId?: EntityId; }
 export interface Permission { readonly id: EntityId; readonly code: string; }
